@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------
 -- Company: 
 -- Engineer: 
--- 
+--
 -- Create Date: 09.02.2017 15:19:33
 -- Design Name: 
 -- Module Name: fsm_enc - Behavioral
