@@ -38,6 +38,10 @@ entity top_level is
            raz           : in STD_LOGIC;
            encA          : in STD_LOGIC;
            encB          : in STD_LOGIC;
+           switch1 : in std_logic;
+           switch2 : in std_logic;
+           led1 : out std_logic;
+           led2 : out std_logic;
            an            : out STD_LOGIC_VECTOR (7 downto 0);
            sept_segments : out STD_LOGIC_VECTOR (6 downto 0)
            );
@@ -131,7 +135,7 @@ signal CE1,CE2 : std_logic;
 signal sortie : std_logic_vector (2 downto 0);
 signal E0, E1, E2, E3, E4, E5, E6, E7 : std_logic_vector (6 downto 0);
 signal nb_increment : std_logic_vector (nb_bits_inc-1 downto 0);
-signal vitesse : std_logic_vector (31 downto 0);
+signal vitesse, diff, nb_in : std_logic_vector (31 downto 0);
 signal pulseA,pulseB : std_logic;
 signal s_hls : std_logic_vector(31 downto 0);
 signal sens : std_logic;
@@ -172,6 +176,7 @@ vite    : entity work.vitesse_enc  port map (H => H,
                                              CE => CE1,
                                              nb_increment => nb_increment,
                                              sens => sens,
+                                             diff => diff,
                                              vitesse => vitesse);
                                  
 --encod   : ENTITY work.test_encodeur port map (H => H,
@@ -191,10 +196,20 @@ encod   : ENTITY work.fsm2         port map (H => H,
 --un : entity work.aff_compteur port map (H => CE1,
 --                                        raz => raz,
 --                                        sortie => nb_increment);
+process(switch1, switch2)
+begin
+    if switch1 = '0' then
+        nb_in <= vitesse;
+    elsif switch2 = '0' then
+        nb_in <= nb_increment;
+    else 
+        nb_in <= diff;
+    end if;
+end process;
 
 seg7    : ENTITY work.transcodeur port map (H => H,
                                              raz => raz,
-                                             nb_in => vitesse,
+                                             nb_in => nb_in,
                                              nb_out => s_hls);
                                              
 tcd : transcod2 port map (vect_hls => s_hls, 
@@ -206,5 +221,8 @@ tcd : transcod2 port map (vect_hls => s_hls,
                           S6       => E5,
                           S7       => E6,
                           S8       => E7);
+
+led1 <= encA;
+led2 <= encB;
 
 end Behavioral;
