@@ -1,161 +1,147 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    14:20:28 09/16/2014 
--- Design Name: 
--- Module Name:    filtre_antirebond - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:    00:53:34 09/28/2009
+-- Design Name:
+-- Module Name:    leds - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
--- Additional Comments: 
+-- Additional Comments:
 --
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+entity rotation_led is
+  port (rotation : in  std_logic_vector(1 downto 0);
+              poussoir : in  std_logic;
+              H        : in  std_logic;
+              reset    : in  std_logic;
+              led      : out std_logic_vector(31 downto 0));
+end entity rotation_led;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+architecture deux_process of rotation_led is
 
-ENTITY anti_rebonds IS
-PORT (
-	H               : IN STD_LOGIC;
-	R               : IN STD_LOGIC;
-	bouton_poussoir : IN STD_LOGIC;
-	ligne_bouton    : IN STD_LOGIC_VECTOR (1 downto 0);
-	sortie_led      : OUT STD_LOGIC_VECTOR (7 downto 0)
-);
-END;
+type etats is (initial, detect_sens, horaire, anti_horaire, increment, decrement, attente_horaire, attente_anti_horaire);
+signal etat      : etats;
+signal pas       : std_logic_vector(31 downto 0);
 
-ARCHITECTURE decodeur OF anti_rebonds IS
-	type etats is (debut, etat0, etat1, etat2, etat3, inc, dec);
-	SIGNAL etatc       : etats;
-	SIGNAL etatf       : etats;
-	SIGNAL rotation    : STD_LOGIC_VECTOR (1 downto 0);
-	SIGNAL led_tampon  : UNSIGNED (7 downto 0);  -- avant traitement par bouton poussoir 
-	SIGNAL led         : UNSIGNED (7 downto 0);
-BEGIN
+begin
 
-	synchrone : PROCESS(H)
-	BEGIN
-		IF(H'event and H = '1') THEN
-			IF (R = '1') THEN
-				etatc <= debut;
-			ELSE
-				etatc <= etatf;
-			END IF;
-		END IF;
-	END PROCESS;
+calcul_etat : process(H)
+begin
+        if (H'event and H='1') then
+                if reset='1' then
+                        etat<=initial;
+                else
+                        case etat is
+                                when initial =>
+                                                if rotation = "00" then
+                                                        etat<=detect_sens;
+                                                else
+                                                        etat<=initial;
+                                                end if;
+
+                                when detect_sens =>
+                                                case rotation is
+                                                        when "00"   => etat <= detect_sens;
+                                                        when "01"   => etat <= horaire;
+                                                        when "10"   => etat <= anti_horaire;
+                                                        when "11"   => etat <= detect_sens;
+                                                        when others => etat <= initial;
+                                                end case;
+
+                                when horaire =>                    case rotation is
+                                                        when "00" => etat<=detect_sens;
+                                                        when "01" => etat<=horaire;
+                                                        when "10" => etat<=detect_sens;
+                                                        when "11" => etat<=increment;
+                                                        when others => etat<= initial;
+                                                     end case;
+
+                                when anti_horaire => case rotation is
+                                                        when "00" => etat<=detect_sens;
+                                                        when "01" => etat<=detect_sens;
+                                                        when "10" => etat<=anti_horaire;
+                                                        when "11" => etat<=decrement;
+                                                        when others => etat<= initial;
+                                                     end case;
+
+                                when increment => etat<=attente_horaire;
+
+                                when decrement => etat<=attente_anti_horaire;
+
+                                when attente_horaire =>                            case rotation is
+                                                                when "00" => etat<=detect_sens;
+                                                                when "01" => etat<=anti_horaire;
+                                                                when "10" => etat<=attente_horaire;
+                                                                when "11" => etat<=attente_horaire;
+                                                                when others => etat<= initial;
+                                                             end case;
+
+                                when attente_anti_horaire => case rotation is
+                                                                when "00" => etat<=detect_sens;
+                                                                when "01" => etat<=attente_anti_horaire;
+                                                                when "10" => etat<=horaire;
+                                                                when "11" => etat<=attente_anti_horaire;
+                                                                when others => etat<= initial;
+                                                             end case;
+                        end case;
+                end if;
+        end if;
+end process calcul_etat;
 
 
-calcul_anti_rebond : PROCESS(ligne_bouton, H, R)
-	BEGIN
-		IF (R = '1') THEN
-			rotation <= "00";
-		ELSE
-			IF ligne_bouton = "00" THEN
-				rotation(1) <= rotation(1);
-				rotation(0) <= '0';
-			ELSIF ligne_bouton = "01" THEN
-				rotation(1) <= '0';
-				rotation(0) <= rotation(0);
-			ELSIF ligne_bouton = "10" THEN
-				rotation(1) <= '1';
-				rotation(0) <= rotation(0);
-			ELSIF ligne_bouton = "11" THEN
-				rotation(1) <= rotation(1);
-				rotation(0) <= '1';
-			ELSE
-				rotation(1) <= rotation(1);
-				rotation(0) <= rotation(0);
-			END IF;
-		END IF;
-	END PROCESS;
-	
-	
+
+calcul_pas : process(H)
+begin
+if (H'event and H ='1') then
+                case etat is
+                        when initial =>   pas <= (others => '0'); -- valeur d'initialisation par défaut
+                        when increment => pas <= pas + 1;
+                        when decrement => pas <= pas - 1;
+                        when others    => pas <= pas;
+                end case;
 
 
-	machine_etat : PROCESS(H, rotation, etatc, R)
-	BEGIN
-			CASE etatc IS
-				WHEN debut =>
-					IF rotation = "01" THEN
-						etatf <= etat1;
-					ELSIF rotation = "10" THEN
-						etatf <= etat2;
-					ELSE 
-						etatf <= debut;
-						led_tampon <= "00001000";
-					END IF;
-				WHEN etat0 =>
-					IF rotation = "01" THEN
-						etatf <= etat1;
-					ELSIF rotation = "10" THEN
-						etatf <= etat2;
-					ELSE 
-						etatf <= etat0;
-					END IF;
-				WHEN etat1 =>
-					IF rotation = "11" THEN
-						etatf <= dec;
-					ELSIF rotation = "01" THEN
-						etatf <= etat1;
-					ELSE 
-						etatf <= etat0;
-					END IF;
-				WHEN etat2 =>
-					IF rotation = "11" THEN
-						etatf <= inc;
-					ELSIF rotation = "10" THEN
-						etatf <= etat2;
-					ELSE 
-						etatf <= etat0;
-					END IF;
-				WHEN etat3 =>
-					IF rotation = "00" THEN
-						etatf <= etat0;
-					ELSE 
-						etatf <= etat3;
-					END IF;
-				WHEN inc =>
-					etatf <= etat3;
-					led_tampon <= led_tampon ror 1;      -- Rotate Right of 1 bit
-				WHEN dec =>
-					etatf <= etat3;
-					led_tampon <= led_tampon rol 1;      -- Rotate Left of 1 bit
-				WHEN OTHERS =>
-					etatf <= etatc;
-			END CASE;
-	END PROCESS;
-	
-	
-	negation_led : PROCESS(H, R, led_tampon, bouton_poussoir)
-	BEGIN
-		IF(H'event and H = '1') THEN
-			IF (R = '1') THEN
-				led <= "00000000";
-			ELSE
-				IF bouton_poussoir = '1' THEN 
-					led <= NOT(led_tampon);
-				ELSE
-					led <= led_tampon;
-				END IF;
-			END IF;
-		END IF;
-	END PROCESS;
+--              if poussoir ='0' then -- boutton poussoir non apuyé
+--                      case pas is
+--                              when "000" => led <= "10000000"; -- led 0 allumée
+--                              when "001" => led <= "01000000"; -- led 1 allumée
+--                              when "010" => led <= "00100000"; -- led 2 allumée
+--                              when "011" => led <= "00010000"; -- led 3 allumée
+--                              when "100" => led <= "00001000"; -- led 4 allumée
+--                              when "101" => led <= "00000100"; -- led 5 allumée
+--                              when "110" => led <= "00000010"; -- led 6 allumée
+--                              when "111" => led <= "00000001"; -- led 7 allumée
+--                              when others => led <= "10101010"; -- erreur
+--                      end case;
+--              else
+--                      case pas is
+--                              when "000" => led <= "01111111"; -- led 0 éteinte
+--                              when "001" => led <= "10111111"; -- led 1 éteinte
+--                              when "010" => led <= "11011111"; -- led 2 éteinte
+--                              when "011" => led <= "11101111"; -- led 3 éteinte
+--                              when "100" => led <= "11110111"; -- led 4 éteinte
+--                              when "101" => led <= "11111011"; -- led 5 éteinte
+--                              when "110" => led <= "11111101"; -- led 6 éteinte
+--                              when "111" => led <= "11111110"; -- led 7 éteinte
+--                              when others => led <= "01010101"; -- erreur
+--                      end case;
+--              end if;
+end if;
+end process calcul_pas;
 
-sortie_led <= STD_LOGIC_VECTOR(led);	
+        led <= pas;
 
-END decodeur;
+end deux_process;

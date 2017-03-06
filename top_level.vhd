@@ -36,8 +36,7 @@ entity top_level is
            nb_bits_inc     : INTEGER := 32 );
     Port ( H             : in STD_LOGIC;
            raz           : in STD_LOGIC;
-           encA          : in STD_LOGIC;
-           encB          : in STD_LOGIC;
+           encs          : in STD_LOGIC_VECTOR (1 downto 0);
            switch1 : in std_logic;
            switch2 : in std_logic;
            led1 : out std_logic;
@@ -186,12 +185,11 @@ vite    : entity work.vitesse_enc  port map (H => H,
 --                                  led => led,
 --                                  nb_increment => nb_increment);
 
-encod   : ENTITY work.fsm2         port map (H => H,
-                                             raz => raz,
-                                             encA => encA,
-                                             encB => encB,
-                                             sens => sens,
-                                             nb_increment => nb_increment);
+fsm   : ENTITY work.rotation_led           port map (H => H,
+                                                     reset => raz,
+                                                     rotation => encs,
+                                                     poussoir => '0',
+                                                     led => nb_increment);
 
 --un : entity work.aff_compteur port map (H => CE1,
 --                                        raz => raz,
@@ -222,7 +220,7 @@ tcd : transcod2 port map (vect_hls => s_hls,
                           S7       => E6,
                           S8       => E7);
 
-led1 <= encA;
-led2 <= encB;
+led1 <= encs(0);
+led2 <= encs(1);
 
 end Behavioral;

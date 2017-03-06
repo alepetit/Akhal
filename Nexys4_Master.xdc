@@ -216,14 +216,14 @@ set_property IOSTANDARD LVCMOS33 [get_ports {an[7]}]
 #set_property PACKAGE_PIN F14 [get_ports {JA[1]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JA[1]}]
 ##Bank = 15, Pin name = IO_L16N_T2_A27_15,					Sch name = JA3
-set_property PACKAGE_PIN D17 [get_ports encA]
-set_property IOSTANDARD LVCMOS33 [get_ports encA]
+set_property PACKAGE_PIN D17 [get_ports encs[0]]
+set_property IOSTANDARD LVCMOS33 [get_ports encs[0]]
 ##Bank = 15, Pin name = IO_L16P_T2_A28_15,					Sch name = JA4
 #set_property PACKAGE_PIN E17 [get_ports {JA[3]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JA[3]}]
 ##Bank = 15, Pin name = IO_0_15,							Sch name = JA7
-set_property PACKAGE_PIN G13 [get_ports encB]
-set_property IOSTANDARD LVCMOS33 [get_ports encB]
+set_property PACKAGE_PIN G13 [get_ports encs[1]]
+set_property IOSTANDARD LVCMOS33 [get_ports encs[1]]
 ##Bank = 15, Pin name = IO_L20N_T3_A19_15,					Sch name = JA8
 #set_property PACKAGE_PIN C17 [get_ports {JA[5]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JA[5]}]
