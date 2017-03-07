@@ -112,17 +112,6 @@ component vitesse_enc
               vitesse      : out STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
---component test_encodeur
---    Generic ( 
---           nb_bits_inc     : INTEGER := 14 );
---    Port ( H        : in STD_LOGIC;
---           raz      : in STD_LOGIC;
---           encA     : in STD_LOGIC;
---           encB     : in STD_LOGIC;
---           led      : out std_logic_vector (1 downto 0);
---           nb_increment : out STD_LOGIC_VECTOR (nb_bits_inc-1 downto 0));
---end component;
-
 component detec_imp
     Port ( signal_enc : in STD_LOGIC;
            H : in STD_LOGIC;
@@ -130,14 +119,14 @@ component detec_imp
 end component;
 
 -- SIGNAUX --
-signal CE1,CE2 : std_logic;
-signal sortie : std_logic_vector (2 downto 0);
+signal CE1,CE2                        : std_logic;
+signal sortie                         : std_logic_vector (2 downto 0);
 signal E0, E1, E2, E3, E4, E5, E6, E7 : std_logic_vector (6 downto 0);
-signal nb_increment : std_logic_vector (nb_bits_inc-1 downto 0);
-signal vitesse, diff, nb_in : std_logic_vector (31 downto 0);
-signal pulseA,pulseB : std_logic;
-signal s_hls : std_logic_vector(31 downto 0);
-signal sens : std_logic;
+signal nb_increment                   : std_logic_vector (nb_bits_inc-1 downto 0);
+signal vitesse, diff, nb_in           : std_logic_vector (31 downto 0);
+signal pulseA, pulseB                 : std_logic;
+signal s_hls                          : std_logic_vector(31 downto 0);
+signal sens                           : std_logic;
 
 
 begin
@@ -185,11 +174,10 @@ vite    : entity work.vitesse_enc  port map (H => H,
 --                                  led => led,
 --                                  nb_increment => nb_increment);
 
-fsm   : ENTITY work.rotation_led           port map (H => H,
-                                                     reset => raz,
-                                                     rotation => encs,
-                                                     poussoir => '0',
-                                                     led => nb_increment);
+fsm   : ENTITY work.fsm3           port map (H => H,
+                                             raz => raz,
+                                             encs => encs,
+                                             nb_increment => nb_increment);
 
 --un : entity work.aff_compteur port map (H => CE1,
 --                                        raz => raz,
