@@ -121,7 +121,7 @@ calcul_cpt : process(H)
 begin
 if (H'event and H ='1') then
                 case etat is
-                        when initial =>   cpt <= 100000001;--1073741824;
+                        when initial =>   cpt <= 10000;--1073741824;
                         when increment => cpt <= cpt + 1;
                         when decrement => cpt <= cpt - 1;
                         when others    => cpt <= cpt;
