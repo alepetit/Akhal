@@ -34,10 +34,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity fsm2 is
     Port ( H : in STD_LOGIC;
            raz : in STD_LOGIC;
-           encA : in STD_LOGIC;
-           encB : in STD_LOGIC;
-           nb_increment : out STD_LOGIC_VECTOR (31 downto 0);
-           sens : out STD_LOGIC
+           encs : in STD_LOGIC_VECTOR (1 downto 0);
+           nb_increment : out STD_LOGIC_VECTOR (31 downto 0)
            );
 end fsm2;
 
@@ -46,7 +44,7 @@ architecture Behavioral of fsm2 is
     type etat is (init, oo, oi, io, ii);
 
     signal etat_present, etat_futur : etat;
-    signal cpt_incr : integer range 0 to 99999999;
+    signal cpt_incr : integer range 0 to 2147483647;
     signal etat_courant : integer range 0 to 3;
 
     signal valid : std_logic_vector (3 downto 0);
@@ -65,28 +63,28 @@ begin
         end if;
     end process;
     
-    futur : process (etat_present, valid, etat_courant, encA, encB)
+    futur : process (etat_present, valid, etat_courant, encs(0), encs(1))
     begin
         case etat_present is 
-            when init => if (encA='1' and encB='1') then etat_futur <= ii;
-                         elsif (encA='1' and encB='0') then etat_futur <= io;
-                         elsif (encA='0' and encB='1') then etat_futur <= oi;
+            when init => if (encs="11") then etat_futur <= ii;
+                         elsif (encs="01") then etat_futur <= io;
+                         elsif (encs="10") then etat_futur <= oi;
                          else etat_futur <= oo;
                          end if;
-            when oo   => if (encA='1' and encB='0') then etat_futur <= io;
-                         elsif (encA='0' and encB='1') then etat_futur <= oi;
+            when oo   => if (encs="01") then etat_futur <= io;
+                         elsif (encs="10") then etat_futur <= oi;
                          else etat_futur <= oo;
                          end if;
-            when oi   => if (encA='1' and encB='1') then etat_futur <= ii;
-                         elsif (encA = '0' and encB = '0') then etat_futur <= oo;
+            when oi   => if (encs="11") then etat_futur <= ii;
+                         elsif (encs="00") then etat_futur <= oo;
                          else etat_futur <= oi;
                          end if;
-            when io   => if (encA='1' and encB='1') then etat_futur <= ii;
-                         elsif (encA = '0' and encB = '0') then etat_futur <= oo;
+            when io   => if (encs="11") then etat_futur <= ii;
+                         elsif (encs="00") then etat_futur <= oo;
                          else etat_futur <= io;
                          end if;
-            when ii   => if (encA='1' and encB='0') then etat_futur <= io;
-                         elsif (encA = '0' and encB = '1') then etat_futur <= oi;
+            when ii   => if (encs="01") then etat_futur <= io;
+                         elsif (encs="10") then etat_futur <= oi;
                          else etat_futur <= ii;
                          end if;
         end case;
@@ -100,9 +98,9 @@ begin
 --    end process;
     
     
-    courant : process (etat_present, H)
+    courant : process (etat_present)
     begin
-    if rising_edge(H) then
+--    if rising_edge(H) then
         case etat_present is
             when init => valid <= "0000";
                          etat_courant <= 0;
@@ -131,43 +129,24 @@ begin
                             valid(3) <= '1';
                          end if;
         end case;
-    end if;
+--    end if;
     end process;
     
     direction : process (H, raz, etat_present, etat_futur)
         begin
             if rising_edge(H) then
                 if raz = '1' then
-                    sens <= '1';
+                    cpt_incr <= 10000;
                 elsif (etat_present = oo and etat_futur = io) then 
-                    sens <= '1';
+                    cpt_incr <= cpt_incr + 1;
                 elsif (etat_present = oi and etat_futur = ii) then 
-                    sens <= '0';
+                    cpt_incr <= cpt_incr - 1;
                 end if;
             end if;
         end process;
     
-    courant2 : process(H, raz, valid)
-    begin
-        if rising_edge(H) then
-            if raz = '1' then
-                cpt_incr <= 0;
-            elsif valid = "1111" then
-                cpt_incr <= cpt_incr + 1;
-            end if;
-        end if;
-    end process;
 
-    
 
---    process (H, etat_present, etat_futur)
---    begin
---        if rising_edge(H) then
---            if (etat_present = oo and etat_futur = io) then sens <= '1';
---            elsif (etat_present = oi and etat_futur = ii) then sens <= '0';
---            end if;
---        end if;
---    end process;
 
     nb_increment <= std_logic_vector(to_unsigned(cpt_incr, 32));
 
