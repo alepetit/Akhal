@@ -46,18 +46,19 @@ end vitesse_enc;
 architecture Behavioral of vitesse_enc is
 
 signal vit, nb_prec, nb_incr, diff1 : integer; -- checker l'overflow
-signal toto : signed(31 downto 0);
+signal toto : unsigned(31 downto 0);
 
 begin
 
-nb_incr <= to_integer(signed(nb_increment));
+nb_incr <= to_integer(unsigned(nb_increment));
 
-process(CE, H)
+process(H)
 begin
     if rising_edge(H) then
         if raz = '1' then
             nb_prec <= 0;
-            vit <= 0;
+            vit     <= 0;
+            diff1   <= 0;
         elsif CE = '1' then
             if nb_incr >= nb_prec then
                 vit <= 160800*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
@@ -66,16 +67,17 @@ begin
                 vit <= 160800*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_prec - nb_incr;
             end if;
-            nb_prec <= to_integer(signed(nb_increment));
+            nb_prec <= nb_incr;
         else
-            vit <= vit;
+            diff1   <= diff1;
+            vit     <= vit;
             nb_prec <= nb_prec;            
         end if;
     end if;
 end process; 
 
-toto <= to_signed(vit, 32);
+toto <= to_unsigned(vit, 32);
 vitesse <= std_logic_vector( RESIZE( toto(31 downto 16), 32) );
-diff <= std_logic_vector(to_signed(diff1, 32));
+diff <= std_logic_vector(to_unsigned(diff1, 32));
 
 end Behavioral;

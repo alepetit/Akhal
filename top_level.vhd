@@ -41,6 +41,7 @@ entity top_level is
            switch2 : in std_logic;
            led1 : out std_logic;
            led2 : out std_logic;
+           pwm : out std_logic;
            an            : out STD_LOGIC_VECTOR (7 downto 0);
            sept_segments : out STD_LOGIC_VECTOR (6 downto 0)
            );
@@ -161,7 +162,7 @@ begin
     end if;
 end process;
 
-seg7    : ENTITY work.transcodeur port map ( nb_in => nb_in,
+seg7    : ENTITY work.transcodeur port map ( nb_in => nb_in (26 downto 0),
                                              nb_out => s_hls);
                                              
 tcd : transcod2 port map (vect_hls => s_hls, 
@@ -174,7 +175,19 @@ tcd : transcod2 port map (vect_hls => s_hls,
                           S7       => E6,
                           S8       => E7);
 
-led1 <= encs(0);
-led2 <= encs(1);
+out_pwm : ENTITY work.gen_pwm port map (H => H,
+                                    raz => raz,
+                                    commande => "111111111",
+                                    pwm => pwm);
+
+process (H) 
+begin
+    if rising_edge(H) then
+        led1 <= encs(0);
+        led2 <= encs(1);
+    end if;
+ 
+end process;    
+
 
 end Behavioral;

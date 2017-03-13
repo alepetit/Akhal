@@ -34,19 +34,20 @@ use IEEE.NUMERIC_STD.ALL;
 entity gen_pwm is
     Port ( H : in STD_LOGIC;
            raz : in STD_LOGIC;
-           commande : in STD_LOGIC_VECTOR (5 downto 0);
+           commande : in STD_LOGIC_VECTOR (8 downto 0);
            pwm : out STD_LOGIC);
 end gen_pwm;
 
 architecture Behavioral of gen_pwm is
 
 signal s : std_logic;
+
 signal cpt : integer;
 signal alpha : integer;
 
 begin
 
-alpha <= to_integer(unsigned(commande));
+alpha <= to_integer(unsigned(commande) & "000000");
 
 process (H, raz)
 begin
@@ -54,7 +55,7 @@ begin
         if raz = '1' then
             cpt <= 0;
         else
-            if cpt = 62 then
+            if cpt = 32766 then
                 cpt <= 0;
             else cpt <= cpt + 1;
             end if;
