@@ -130,7 +130,7 @@ if (H'event and H ='1') then
 end if;
 end process calcul_cpt;
 
-        nb_increment <= std_logic_vector(to_unsigned(cpt,32));
+        nb_increment <= std_logic_vector(to_signed(cpt,32));
 
 
 end Behavioral;

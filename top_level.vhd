@@ -80,16 +80,6 @@ component mux8
            );
 end component;
 
---component transcodeur
---    port (
---	        nb_bin         : in  STD_LOGIC_VECTOR (13 downto 0);
---	        S_mil          : out STD_LOGIC_VECTOR (6 downto 0);
---            S_uni          : out STD_LOGIC_VECTOR (6 downto 0);
---            S_diz          : out STD_LOGIC_VECTOR (6 downto 0);
---            S_cent         : out STD_LOGIC_VECTOR (6 downto 0)
---          );
---end component;
-
 component transcod2 is
     Port ( vect_hls : in STD_LOGIC_VECTOR (31 downto 0);
        S1 : out STD_LOGIC_VECTOR (6 downto 0);
@@ -112,21 +102,13 @@ component vitesse_enc
               vitesse      : out STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
-component detec_imp
-    Port ( signal_enc : in STD_LOGIC;
-           H : in STD_LOGIC;
-           impulse : out STD_LOGIC);
-end component;
-
 -- SIGNAUX --
 signal CE1,CE2                        : std_logic;
 signal sortie                         : std_logic_vector (2 downto 0);
 signal E0, E1, E2, E3, E4, E5, E6, E7 : std_logic_vector (6 downto 0);
 signal nb_increment                   : std_logic_vector (nb_bits_inc-1 downto 0);
 signal vitesse, diff, nb_in           : std_logic_vector (31 downto 0);
-signal pulseA, pulseB                 : std_logic;
 signal s_hls                          : std_logic_vector(31 downto 0);
-signal sens                           : std_logic;
 
 
 begin
@@ -153,36 +135,22 @@ mux_4   : mux8         port map (COMMANDE => sortie,
                                  E7 => E7,
                                  S => sept_segments);
                                  
---transc  : transcodeur  port map (nb_bin => nb_increment,
---                                 S_mil => E3,
---                                 S_uni => E0,
---                                 S_diz => E1,
---                                 S_cent => E2);
                                  
 vite    : entity work.vitesse_enc  port map (H => H,
                                              raz => raz,
                                              CE => CE1,
                                              nb_increment => nb_increment,
-                                             sens => sens,
                                              diff => diff,
                                              vitesse => vitesse);
                                  
---encod   : ENTITY work.test_encodeur port map (H => H,
---                                  raz => raz,
---                                  encA => encA,
---                                  encB => encB,
---                                  led => led,
---                                  nb_increment => nb_increment);
+
 
 fsm   : ENTITY work.fsm3           port map (H => H,
                                              raz => raz,
                                              encs => encs,
                                              nb_increment => nb_increment);
 
---un : entity work.aff_compteur port map (H => CE1,
---                                        raz => raz,
---                                        sortie => nb_increment);
-process(switch1, switch2)
+process(switch1, switch2, nb_increment, vitesse, diff)
 begin
     if switch1 = '0' then
         nb_in <= vitesse;
@@ -193,9 +161,7 @@ begin
     end if;
 end process;
 
-seg7    : ENTITY work.transcodeur port map (H => H,
-                                             raz => raz,
-                                             nb_in => nb_in,
+seg7    : ENTITY work.transcodeur port map ( nb_in => nb_in,
                                              nb_out => s_hls);
                                              
 tcd : transcod2 port map (vect_hls => s_hls, 

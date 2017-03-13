@@ -3,9 +3,7 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.numeric_std.all;
 
 entity transcodeur is
-    port (
-            H, raz        : in STD_LOGIC;
-	        nb_in         : in  STD_LOGIC_VECTOR (31 downto 0);
+    port (  nb_in         : in  STD_LOGIC_VECTOR (31 downto 0);
 	        nb_out        : out STD_LOGIC_VECTOR (31 downto 0)
           );
 end transcodeur;

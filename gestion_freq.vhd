@@ -46,11 +46,11 @@ signal compt2 : natural range 1 to 33334;
 begin
     CE : process(H)
     begin
-        if (rising_edge (H)) then
-            if (raz='1') then
-                compt1<=1;
+        if (rising_edge(H)) then
+            if (raz = '1') then
+                compt1 <= 1;
             else
-                if (compt1=10000000) then
+                if (compt1 = 10000000) then
                     compt1 <= 1;
                     CE1 <= '1';
                 else
@@ -63,11 +63,11 @@ begin
     
     CE_bis : process(H)
     begin
-        if (rising_edge (H)) then
-            if (raz='1') then
-                compt2<=1;
+        if (rising_edge(H)) then
+            if (raz = '1') then
+                compt2 <= 1;
             else            
-                if (compt2=33334) then
+                if (compt2 = 33334) then
                     compt2 <= 1;
                     CE2 <= '1';
                 else

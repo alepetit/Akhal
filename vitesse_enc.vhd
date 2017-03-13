@@ -39,18 +39,18 @@ entity vitesse_enc is
               CE           : in STD_LOGIC;
               nb_increment : in STD_LOGIC_VECTOR (nb_bits_inc-1 downto 0);
               diff         : out std_logic_vector(31 downto 0);
-              sens         : in STD_LOGIC;
+              --sens         : in STD_LOGIC;
               vitesse      : out STD_LOGIC_VECTOR (31 downto 0));
 end vitesse_enc;
 
 architecture Behavioral of vitesse_enc is
 
 signal vit, nb_prec, nb_incr, diff1 : integer; -- checker l'overflow
-signal toto : unsigned(31 downto 0);
+signal toto : signed(31 downto 0);
 
 begin
 
-nb_incr <= to_integer(unsigned(nb_increment));
+nb_incr <= to_integer(signed(nb_increment));
 
 process(CE, H)
 begin
@@ -66,7 +66,7 @@ begin
                 vit <= 160800*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_prec - nb_incr;
             end if;
-            nb_prec <= to_integer(unsigned(nb_increment));
+            nb_prec <= to_integer(signed(nb_increment));
         else
             vit <= vit;
             nb_prec <= nb_prec;            
@@ -74,8 +74,8 @@ begin
     end if;
 end process; 
 
-toto <= to_unsigned(vit, 32);
+toto <= to_signed(vit, 32);
 vitesse <= std_logic_vector( RESIZE( toto(31 downto 16), 32) );
-diff <= std_logic_vector(to_unsigned(diff1, 32));
+diff <= std_logic_vector(to_signed(diff1, 32));
 
 end Behavioral;

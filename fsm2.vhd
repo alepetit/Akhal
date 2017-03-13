@@ -90,17 +90,10 @@ begin
         end case;
     end process;
     
---    sortie : process (H)
---    begin
---        if rising_edge(H) then
---            nb_increment <= std_logic_vector(to_unsigned(cpt_incr, 32));
---        end if;
---    end process;
-    
     
     courant : process (etat_present)
     begin
---    if rising_edge(H) then
+    if rising_edge(H) then
         case etat_present is
             when init => valid <= "0000";
                          etat_courant <= 0;
@@ -129,14 +122,14 @@ begin
                             valid(3) <= '1';
                          end if;
         end case;
---    end if;
+    end if;
     end process;
     
     direction : process (H, raz, etat_present, etat_futur)
         begin
             if rising_edge(H) then
                 if raz = '1' then
-                    cpt_incr <= 10000;
+                    cpt_incr <= 10000000;
                 elsif (etat_present = oo and etat_futur = io) then 
                     cpt_incr <= cpt_incr + 1;
                 elsif (etat_present = oi and etat_futur = ii) then 
@@ -148,7 +141,7 @@ begin
 
 
 
-    nb_increment <= std_logic_vector(to_unsigned(cpt_incr, 32));
+    nb_increment <= std_logic_vector(to_signed(cpt_incr, 32));
 
 
 
