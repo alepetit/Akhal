@@ -177,7 +177,7 @@ tcd : transcod2 port map (vect_hls => s_hls,
 
 out_pwm : ENTITY work.gen_pwm port map (H => H,
                                     raz => raz,
-                                    commande => "111111111",
+                                    commande => "101101111",
                                     pwm => pwm);
 
 process (H) 

@@ -34,14 +34,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity asserv_vitesse is
     Port ( H : in STD_LOGIC;
            raz : in STD_LOGIC;
-           commande : in STD_LOGIC_VECTOR (5 downto 0);
-           retour_enc : in STD_LOGIC_VECTOR (5 downto 0);
-           vitesse : out STD_LOGIC_VECTOR (5 downto 0));
+           commande : in STD_LOGIC_VECTOR (8 downto 0);
+           retour_enc : in STD_LOGIC_VECTOR (8 downto 0);
+           vitesse : out STD_LOGIC_VECTOR (8 downto 0));
 end asserv_vitesse;
 
 architecture Behavioral of asserv_vitesse is
 
 begin
+
+    
 
 
 end Behavioral;
