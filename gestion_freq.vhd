@@ -39,8 +39,11 @@ entity gestion_freq is
 end gestion_freq;
 
 architecture Behavioral of gestion_freq is
+constant hertz : integer := 100;
+constant fpgafreq : integer := 100000000;
+constant timer1 : integer := fpgafreq/hertz;
 
-signal compt1 : natural range 1 to 2000000;
+signal compt1 : natural range 1 to timer1;
 signal compt2 : natural range 1 to 33334;
 
 begin
@@ -50,7 +53,7 @@ begin
             if (raz = '1') then
                 compt1 <= 1;
             else
-                if (compt1 = 2000000) then
+                if (compt1 = timer1) then
                     compt1 <= 1;
                     CE1 <= '1';
                 else

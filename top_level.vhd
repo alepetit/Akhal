@@ -58,8 +58,8 @@ signal nb_increment : std_logic_vector (nb_bits_inc-1 downto 0);
 signal vitesse, diff, nb_in : std_logic_vector (31 downto 0);
 signal fencs : STD_LOGIC_VECTOR(1 downto 0);
 
-signal i_pwm                           : std_logic_vector(8 downto 0);
-signal data_from_uart, i_uart          : std_logic_vector(7 downto 0) := "01010101";
+signal data_from_uart : std_logic_vector(7 downto 0) := "01010101";
+signal i_uart          : std_logic_vector(7 downto 0);
 signal data_to_uart                    : std_logic_vector(7 downto 0);
 signal dat_en_rx, dat_en_tx            : std_logic;
 
@@ -77,7 +77,7 @@ rebonds : entity work.anti_rebond  port map(encs       => encs,
                                             valeur_rot => fencs
                                             );
                                         
-encod   : entity work.fsm2         port map (H           => H,
+encod   : entity work.fsm3         port map (H           => H,
                                             raz          => raz,
                                             encs         => fencs,
                                             nb_increment => nb_increment
@@ -117,22 +117,12 @@ begin
     end if;
 end process;
 
-process(H)
-    variable t1 : integer range 0 to 255;
-    variable t2 : integer range 0 to 511;
-begin
-    if rising_edge(H) then
-        t1 := to_integer(unsigned(i_uart));
-        t2 := (t1-97)*16;
-        i_pwm <= std_logic_vector(to_unsigned(t2,9));
-    end if;
-end process;
 
-led <= i_pwm;
+led <= '0' & i_uart;
 
 out_pwm : ENTITY work.gen_pwm port map (H        => H,
                                         raz      => raz,
-                                        commande => i_pwm,
+                                        commande => i_uart,
                                         pwm      => pwm
                                         );
 
@@ -150,7 +140,7 @@ uart_tx : ENTITY work.UART_send port map (clk => H,
                                           busy => open);
                                           
 --data_to_uart <= vitesse(7 downto 0);
-data_to_uart <= STD_LOGIC_VECTOR(TO_UNSIGNED(TO_INTEGER(UNSIGNED(vitesse(7 downto 3))) + 97, 8));
+data_to_uart <= diff(7 downto 0) when (switch1 = '1' and switch2 = '1') ELSE vitesse(8 downto 1);
                                        
 
 process(H)

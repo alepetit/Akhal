@@ -34,7 +34,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity gen_pwm is
     Port ( H : in STD_LOGIC;
            raz : in STD_LOGIC;
-           commande : in STD_LOGIC_VECTOR (8 downto 0);
+           commande : in STD_LOGIC_VECTOR (7 downto 0);
            pwm : out STD_LOGIC);
 end gen_pwm;
 
@@ -47,7 +47,7 @@ signal alpha : integer;
 
 begin
 
-alpha <= to_integer(unsigned(commande) & "000000");
+alpha <= to_integer(unsigned(commande));
 
 process (H, raz)
 begin
@@ -55,7 +55,7 @@ begin
         if raz = '1' then
             cpt <= 0;
         else
-            if cpt = 32766 then
+            if cpt = 255 then
                 cpt <= 0;
             else cpt <= cpt + 1;
             end if;
@@ -68,7 +68,7 @@ begin
     if rising_edge(H) then
         if raz = '1' then s <= '0';
         else
-            if cpt<alpha then
+            if cpt <= alpha then
                 s <= '1';
             else s <= '0';
             end if;

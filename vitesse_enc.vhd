@@ -60,13 +60,13 @@ begin
             vit     <= 0;
             diff1   <= 0;
         elsif CE = '1' then
-            if nb_incr >= nb_prec then
-                vit <= 160800*5*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
+            --if nb_incr >= nb_prec then
+                vit <= 1608000*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_incr - nb_prec;
-            else
-                vit <= 160800*5*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
-                diff1 <= nb_prec - nb_incr;
-            end if;
+            --else
+            --    vit <= 1608000*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
+            --    diff1 <= nb_prec - nb_incr;
+            --end if;
             nb_prec <= nb_incr;
         else
             diff1   <= diff1;
