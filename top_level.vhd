@@ -34,16 +34,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity top_level is
     Generic ( 
            nb_bits_inc     : INTEGER := 32 );
-    Port ( H             : in STD_LOGIC;
-           raz           : in STD_LOGIC;
-           encs          : in STD_LOGIC_VECTOR (1 downto 0);
-           switch1 : in std_logic;
-           switch2 : in std_logic;
-           led1 : out std_logic;
-           led2 : out std_logic;
-           pwm : out std_logic;
-           an            : out STD_LOGIC_VECTOR (7 downto 0);
-           sept_segments : out STD_LOGIC_VECTOR (6 downto 0)
+    Port ( H               : in STD_LOGIC;
+           raz             : in STD_LOGIC;
+           encs            : in STD_LOGIC_VECTOR (1 downto 0);
+           switch1         : in std_logic;
+           switch2         : in std_logic;
+           led1            : out std_logic;
+           led2            : out std_logic;
+           pwm             : out std_logic;
+           an              : out STD_LOGIC_VECTOR (7 downto 0);
+           sept_segments   : out STD_LOGIC_VECTOR (6 downto 0)
            );
 end top_level;
 
@@ -51,134 +51,62 @@ end top_level;
 
 architecture Behavioral of top_level is
 
--- COMPONENT --
-component gestion_freq
-    Port ( H            : in STD_LOGIC;
-           raz          : in STD_LOGIC;
-           CE1          : out STD_LOGIC;
-           CE2          : out STD_LOGIC);
-end component;
-
-component mod4
-    Port ( ce : in STD_LOGIC;
-           H : in STD_LOGIC;
-           raz : in STD_LOGIC;
-           AN : out STD_LOGIC_VECTOR (7 downto 0);
-           sortie : out STD_LOGIC_VECTOR (2 downto 0));
-end component;
-
-component mux8
-    Port ( COMMANDE : in STD_LOGIC_VECTOR (2 downto 0);
-           E0 : in STD_LOGIC_VECTOR (6 downto 0);
-           E1 : in STD_LOGIC_VECTOR (6 downto 0);
-           E2 : in STD_LOGIC_VECTOR (6 downto 0);
-           E3 : in STD_LOGIC_VECTOR (6 downto 0);
-           E4 : in STD_LOGIC_VECTOR (6 downto 0);
-           E5 : in STD_LOGIC_VECTOR (6 downto 0);
-           E6 : in STD_LOGIC_VECTOR (6 downto 0);
-           E7 : in STD_LOGIC_VECTOR (6 downto 0);
-           S : out STD_LOGIC_VECTOR (6 downto 0)
-           );
-end component;
-
-component transcod2 is
-    Port ( vect_hls : in STD_LOGIC_VECTOR (31 downto 0);
-       S1 : out STD_LOGIC_VECTOR (6 downto 0);
-       S2 : out STD_LOGIC_VECTOR (6 downto 0);
-       S3 : out STD_LOGIC_VECTOR (6 downto 0);
-       S4 : out STD_LOGIC_VECTOR (6 downto 0);
-       S5 : out STD_LOGIC_VECTOR (6 downto 0);
-       S6 : out STD_LOGIC_VECTOR (6 downto 0);
-       S7 : out STD_LOGIC_VECTOR (6 downto 0);
-       S8 : out STD_LOGIC_VECTOR (6 downto 0));
-end component;
-
-component vitesse_enc
-    Generic ( 
-           nb_bits_inc     : INTEGER := 32 );
-    Port    ( H            : in STD_LOGIC;
-              raz          : in STD_LOGIC;
-              CE           : in STD_LOGIC;
-              nb_increment : in STD_LOGIC_VECTOR (nb_bits_inc-1 downto 0);
-              vitesse      : out STD_LOGIC_VECTOR (31 downto 0));
-end component;
-
 -- SIGNAUX --
-signal CE1,CE2                        : std_logic;
+signal CE_enc, CE_aff                 : std_logic;
 signal sortie                         : std_logic_vector (2 downto 0);
-signal E0, E1, E2, E3, E4, E5, E6, E7 : std_logic_vector (6 downto 0);
 signal nb_increment                   : std_logic_vector (nb_bits_inc-1 downto 0);
 signal vitesse, diff, nb_in           : std_logic_vector (31 downto 0);
-signal s_hls                          : std_logic_vector(31 downto 0);
-
+signal fencs                          : std_logic_vector(1 downto 0);
 
 begin
 
-horloge : gestion_freq port map (H => H,
-                                 raz => raz,
-                                 CE1 => CE1,
-                                 CE2 => CE2);
-
-mod_4   : mod4         port map (ce => CE2,
-                                 H => H,
-                                 raz => raz,
-                                 AN => an,
-                                 sortie => sortie);
-                                 
-mux_4   : mux8         port map (COMMANDE => sortie,
-                                 E0 => E0,
-                                 E1 => E1,
-                                 E2 => E2,
-                                 E3 => E3,
-                                 E4 => E4,
-                                 E5 => E5,
-                                 E6 => E6,
-                                 E7 => E7,
-                                 S => sept_segments);
-                                 
-                                 
-vite    : entity work.vitesse_enc  port map (H => H,
+horloge : entity work.gestion_freq port map (H   => H,
                                              raz => raz,
-                                             CE => CE1,
+                                             CE1 => CE_enc,
+                                             CE2 => CE_aff
+                                             );                                 
+                                 
+vite    : entity work.vitesse_enc  port map (H            => H,
+                                             raz          => raz,
+                                             CE           => CE_enc,
                                              nb_increment => nb_increment,
-                                             diff => diff,
-                                             vitesse => vitesse);
-                                 
-
-
-fsm   : ENTITY work.fsm3           port map (H => H,
-                                             raz => raz,
-                                             encs => encs,
-                                             nb_increment => nb_increment);
-
-process(switch1, switch2, nb_increment, vitesse, diff)
-begin
-    if switch1 = '0' then
-        nb_in <= vitesse;
-    elsif switch2 = '0' then
-        nb_in <= nb_increment;
-    else 
-        nb_in <= diff;
-    end if;
-end process;
-
-seg7    : ENTITY work.transcodeur port map ( nb_in => nb_in (26 downto 0),
-                                             nb_out => s_hls);
+                                             diff         => diff,
+                                             vitesse      => vitesse
+                                             );
                                              
-tcd : transcod2 port map (vect_hls => s_hls, 
-                          S1       => E0,
-                          S2       => E1,
-                          S3       => E2,
-                          S4       => E3,
-                          S5       => E4,
-                          S6       => E5,
-                          S7       => E6,
-                          S8       => E7);
+rebonds : entity work.anti_rebond  port map(encs       => encs,         
+                                            H          => H,        
+                                            raz        => raz,          
+                                            valeur_rot => fencs
+                                            );
+                                
+fsm   : ENTITY work.fsm2           port map (H            => H,
+                                             raz          => raz,
+                                             encs         => fencs,
+                                             nb_increment => nb_increment
+                                             );
+                                             
+aff : entity work.affichage        port map(H        => H,
+                                            raz      => raz,
+                                            CE       => CE_aff,
+                                            nb_in    => nb_in(26 downto 0),
+                                            sept_seg => sept_segments,
+                                            an       => an
+                                            ); 
 
-out_pwm : ENTITY work.gen_pwm port map (H => H,
-                                    raz => raz,
-                                    commande => "101101111",
-                                    pwm => pwm);
+mux_aff : entity work.multiplex    port map(vitesse  => vitesse,
+                                            nb_inc   => nb_increment, 
+                                            diff_inc => diff,
+                                            switch1  => switch1,
+                                            switch2  => switch2,
+                                            sortie   => nb_in
+                                            );
+
+out_pwm : ENTITY work.gen_pwm       port map (H => H,
+                                              raz => raz,
+                                              commande => "101101111",
+                                              pwm => pwm
+                                              );
 
 process (H) 
 begin
@@ -186,7 +114,6 @@ begin
         led1 <= encs(0);
         led2 <= encs(1);
     end if;
- 
 end process;    
 
 
