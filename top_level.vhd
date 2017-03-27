@@ -77,7 +77,7 @@ rebonds : entity work.anti_rebond  port map(encs       => encs,
                                             valeur_rot => fencs
                                             );
                                         
-encod   : entity work.fsm3         port map (H           => H,
+encod   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
                                             encs         => fencs,
                                             nb_increment => nb_increment
