@@ -8,6 +8,22 @@ s.Parity='none';
 s.FlowControl='none';
 
 fopen(s)
-fwrite(s, 'z')
-A = fread(s, 10)
+
+fwrite(s, 'a')
+
+%fwrite(s, 'z')
+
+
+A = zeros(50,1);
+
+fichier = fopen('out.txt','w');
+
+for i = 1:50
+    A(i) = fread(s, 1);
+    fprintf(fichier,'%i\n',A(i));
+end
+
 fclose(s);
+fclose(fichier);
+
+
