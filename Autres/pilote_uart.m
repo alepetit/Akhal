@@ -10,7 +10,7 @@ s.TimeOut = 60;
 fopen(s);
 
 temps = 500;
-fwrite(s, 180)
+fwrite(s, 180);
 
 
 A = zeros(temps,1);
@@ -19,11 +19,13 @@ fichier = fopen('out.txt','w');
 
 A = fread(s, temps);
 
-%A = A .* 2;
-
+for i = 5:temps-1
+    if A(i)<100  %suppression des pics à zéros
+        A(i) = A(i-1);
+    end
+end
 plot(A);
 for i = 1:temps
-%    A(i) = fread(s, 1);
     fprintf(fichier,'%i\t %f\n',i , (A(i)));
 end
 

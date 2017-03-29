@@ -21,6 +21,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.mes_constantes.all;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -32,10 +34,11 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity fsm4 is
-    Port ( H : in STD_LOGIC;
-           raz : in STD_LOGIC;
-           encs : in STD_LOGIC_VECTOR (1 downto 0);
-           nb_increment : out STD_LOGIC_VECTOR (31 downto 0)
+    Port ( H            : in STD_LOGIC;
+           raz          : in STD_LOGIC;
+           CE           : in STD_LOGIC;
+           encs         : in STD_LOGIC_VECTOR (1 downto 0);
+           nb_increment : out STD_LOGIC_VECTOR (nb_bit_increment-1 downto 0)
            );
 end fsm4;
 
@@ -44,11 +47,8 @@ architecture Behavioral of fsm4 is
     type etat is (init, oo, oi, io, ii, oop, oom, oip, oim, iip, iim, iop, iom);
 
     signal etat_present, etat_futur : etat;
-    signal cpt_incr : integer range 0 to 2147483647;
+    signal cpt_incr : integer range 0 to max_increment;
 
-    
-
-    
 begin
 
     synchrone : process (H)
@@ -56,7 +56,9 @@ begin
         if rising_edge(H) then
             if raz = '1' then etat_present <= init;
             else
-                etat_present <= etat_futur;
+                if (CE = '1') then
+                    etat_present <= etat_futur;
+                end if;
             end if;
         end if;
     end process;
@@ -65,8 +67,8 @@ begin
     begin
         case etat_present is 
             when init => if (encs="11") then etat_futur <= ii;
-                         elsif (encs="01") then etat_futur <= oi;
-                         elsif (encs="10") then etat_futur <= io;
+                         elsif (encs="01") then etat_futur <= io;
+                         elsif (encs="10") then etat_futur <= oi;
                          else etat_futur <= oo;
                          end if;
             when oo   => if (encs="01") then etat_futur <= oop;
@@ -81,14 +83,14 @@ begin
                          end if;
             when oip  => etat_futur <= ii;
             when oim  => etat_futur <= oo;
-            when io   => if (encs="11") then etat_futur <= iop;
-                         elsif (encs="00") then etat_futur <= iom;
+            when io   => if (encs="00") then etat_futur <= iop;
+                         elsif (encs="11") then etat_futur <= iom;
                          else etat_futur <= io;
                          end if;
             when iop  => etat_futur <= oo;
             when iom  => etat_futur <= ii;
-            when ii   => if (encs="01") then etat_futur <= iip;
-                         elsif (encs="10") then etat_futur <= iim;
+            when ii   => if (encs="10") then etat_futur <= iip;
+                         elsif (encs="01") then etat_futur <= iim;
                          else etat_futur <= ii;
                          end if;
             when iip  => etat_futur <= io;
@@ -102,20 +104,19 @@ begin
         begin
             if rising_edge(H) then
                 if raz = '1' then
-                    cpt_incr <= 10000000;
-                elsif (etat_present = oop or etat_present = oip or etat_present = iop or etat_present = iip) then 
-                    cpt_incr <= cpt_incr + 1;
-                elsif (etat_present = oom or etat_present = oim or etat_present = iom or etat_present = iim) then 
-                    cpt_incr <= cpt_incr - 1;
-                end if;
+                    cpt_incr <= init_increment;
+                else
+                    if (CE = '1') then
+                        if (etat_present = oop or etat_present = oip or etat_present = iop or etat_present = iip) then 
+                            cpt_incr <= cpt_incr + 1;
+                        elsif (etat_present = oom or etat_present = oim or etat_present = iom or etat_present = iim) then 
+                            cpt_incr <= cpt_incr - 1;
+                        end if;
+                    end if;
+                 end if; 
             end if;
         end process;
-    
 
-
-
-    nb_increment <= std_logic_vector(to_signed(cpt_incr, 32));
-
-
+    nb_increment <= std_logic_vector(to_signed(cpt_incr, nb_bit_increment));
 
 end Behavioral;

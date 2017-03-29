@@ -22,6 +22,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.mes_constantes.all;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -33,12 +35,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity affichage is
-    Port ( H : in STD_LOGIC;
-           raz : in STD_LOGIC;
-           CE : in STD_LOGIC;
-           nb_in : in STD_LOGIC_VECTOR(26 downto 0);
+    Port ( H        : in STD_LOGIC;
+           raz      : in STD_LOGIC;
+           CE       : in STD_LOGIC;
+           nb_in    : in STD_LOGIC_VECTOR(nb_bit_increment-1 downto 0);
            sept_seg : out STD_LOGIC_VECTOR(6 downto 0);
-           an : out STD_LOGIC_VECTOR(7 downto 0)
+           an       : out STD_LOGIC_VECTOR(7 downto 0)
            );
 end affichage;
 

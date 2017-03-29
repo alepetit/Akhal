@@ -21,6 +21,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.mes_constantes.all;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -32,8 +34,6 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity top_level is
-    Generic ( 
-           nb_bits_inc     : INTEGER := 32 );
     Port ( H               : in STD_LOGIC;
            raz             : in STD_LOGIC;
            RsRx            : in STD_LOGIC;
@@ -53,22 +53,25 @@ end top_level;
 architecture Behavioral of top_level is
 
 -- SIGNAUX --
-signal CE_enc, CE_aff : std_logic;
-signal nb_increment : std_logic_vector (nb_bits_inc-1 downto 0);
-signal vitesse, diff, nb_in : std_logic_vector (31 downto 0);
-signal fencs : STD_LOGIC_VECTOR(1 downto 0);
+signal CE_enc, CE_aff, CE_fsm : std_logic;
+signal nb_increment           : std_logic_vector (nb_bit_increment-1 downto 0);
+signal vitesse                : std_logic_vector (nb_bit_vitesse-1 downto 0);
+signal diff                   : std_logic_vector (nb_bit_diff-1 downto 0);
+signal nb_in                  : std_logic_vector (nb_bit_increment-1 downto 0);
+signal fencs                  : STD_LOGIC_VECTOR (1 downto 0);
 
-signal data_from_uart : std_logic_vector(7 downto 0) := "01010101";
-signal i_uart          : std_logic_vector(7 downto 0);
-signal data_to_uart                    : std_logic_vector(7 downto 0);
-signal dat_en_rx, dat_en_tx            : std_logic;
+signal data_from_uart         : std_logic_vector(7 downto 0);
+signal i_uart                 : std_logic_vector(7 downto 0);
+signal data_to_uart           : std_logic_vector(7 downto 0);
+signal dat_en_rx, dat_en_tx   : std_logic;
 
 begin
 
 horloge : entity work.gestion_freq   port map (H  => H,
                                               raz => raz,
-                                              CE1 => CE_enc,
-                                              CE2 => CE_aff
+                                              CE_enc => CE_enc,
+                                              CE_aff => CE_aff,
+                                              CE_fsm => CE_fsm
                                               );
                                  
 rebonds : entity work.anti_rebond  port map(encs       => encs,          
@@ -79,6 +82,7 @@ rebonds : entity work.anti_rebond  port map(encs       => encs,
                                         
 encod   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
+                                            CE           => CE_fsm,
                                             encs         => fencs,
                                             nb_increment => nb_increment
                                             );    
@@ -101,7 +105,7 @@ mux : entity work.multiplex port map(vitesse  => vitesse,
 aff : entity work.affichage   port map(H        => H,
                                        raz      => raz,
                                        CE       => CE_aff,
-                                       nb_in    => nb_in(26 downto 0),
+                                       nb_in    => nb_in,
                                        sept_seg => sept_segments,
                                        an       => an
                                        );                           

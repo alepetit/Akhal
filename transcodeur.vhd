@@ -1,9 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.numeric_std.all;
+use work.mes_constantes.all;
+
 
 entity transcodeur is
-    port (  nb_in         : in  STD_LOGIC_VECTOR (26 downto 0);
+    port (  nb_in         : in  STD_LOGIC_VECTOR (nb_bit_increment-1 downto 0);
 	        nb_out        : out STD_LOGIC_VECTOR (31 downto 0)
           );
 end transcodeur;

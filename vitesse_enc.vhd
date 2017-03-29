@@ -25,6 +25,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
+use work.mes_constantes.all;
+      
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -32,21 +34,20 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity vitesse_enc is
-    Generic ( 
-           nb_bits_inc     : INTEGER := 32 );
     Port    ( H            : in STD_LOGIC;
               raz          : in STD_LOGIC;
               CE           : in STD_LOGIC;
-              nb_increment : in STD_LOGIC_VECTOR (nb_bits_inc-1 downto 0);
-              diff         : out std_logic_vector(31 downto 0);
-              --sens         : in STD_LOGIC;
-              vitesse      : out STD_LOGIC_VECTOR (31 downto 0));
+              nb_increment : in STD_LOGIC_VECTOR  (nb_bit_increment-1 downto 0);
+              diff         : out STD_LOGIC_VECTOR (nb_bit_diff-1 downto 0);
+              vitesse      : out STD_LOGIC_VECTOR (nb_bit_vitesse-1 downto 0));
 end vitesse_enc;
 
 architecture Behavioral of vitesse_enc is
 
-signal vit, nb_prec, nb_incr, diff1 : integer; -- checker l'overflow
-signal toto : unsigned(31 downto 0);
+signal vit              : integer;
+signal nb_prec, nb_incr : integer range 0 to max_increment;
+signal diff1            : integer range 0 to max_diff;
+signal vit_temp         : unsigned(31 downto 0);
 
 begin
 
@@ -76,8 +77,8 @@ begin
     end if;
 end process; 
 
-toto <= to_unsigned(vit, 32);
-vitesse <= std_logic_vector( RESIZE( toto(31 downto 16), 32) );
-diff <= std_logic_vector(to_unsigned(diff1, 32));
+vit_temp    <= to_unsigned(vit, 32);
+vitesse     <= std_logic_vector( RESIZE( vit_temp(31 downto 16), nb_bit_vitesse) );
+diff        <= std_logic_vector(to_unsigned(diff1, nb_bit_diff));
 
 end Behavioral;

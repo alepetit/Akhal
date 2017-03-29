@@ -32,10 +32,10 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity gen_pwm is
-    Port ( H : in STD_LOGIC;
-           raz : in STD_LOGIC;
+    Port ( H        : in STD_LOGIC;
+           raz      : in STD_LOGIC;
            commande : in STD_LOGIC_VECTOR (7 downto 0);
-           pwm : out STD_LOGIC);
+           pwm      : out STD_LOGIC);
 end gen_pwm;
 
 architecture Behavioral of gen_pwm is

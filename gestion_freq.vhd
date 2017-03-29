@@ -21,6 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.mes_constantes.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -34,48 +35,65 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity gestion_freq is
     Port ( H             : in STD_LOGIC;
            raz           : in STD_LOGIC;
-           CE1           : out STD_LOGIC;
-           CE2           : out STD_LOGIC);
+           CE_enc        : out STD_LOGIC;
+           CE_aff        : out STD_LOGIC;
+           CE_fsm        : out STD_LOGIC);
 end gestion_freq;
 
 architecture Behavioral of gestion_freq is
-constant hertz : integer := 100;
-constant fpgafreq : integer := 100000000;
-constant timer1 : integer := fpgafreq/hertz;
 
-signal compt1 : natural range 1 to timer1;
-signal compt2 : natural range 1 to 33334;
+
+signal compt_enc : natural range 1 to timer_enc;
+signal compt_aff : natural range 1 to timer_aff;
+signal compt_fsm : natural range 1 to timer_fsm;
 
 begin
-    CE : process(H)
+    CE_encodeur : process(H)
     begin
         if (rising_edge(H)) then
             if (raz = '1') then
-                compt1 <= 1;
+                compt_enc <= 1;
             else
-                if (compt1 = timer1) then
-                    compt1 <= 1;
-                    CE1 <= '1';
+                if (compt_enc = timer_enc) then
+                    compt_enc <= 1;
+                    CE_enc <= '1';
                 else
-                    compt1 <= compt1 + 1;
-                    CE1 <= '0';
+                    compt_enc <= compt_enc + 1;
+                    CE_enc <= '0';
                 end if;
             end if;
         end if;     
     end process;
     
-    CE_bis : process(H)
+    CE_affichage : process(H)
     begin
         if (rising_edge(H)) then
             if (raz = '1') then
-                compt2 <= 1;
+                compt_aff <= 1;
             else            
-                if (compt2 = 33334) then
-                    compt2 <= 1;
-                    CE2 <= '1';
+                if (compt_aff = timer_aff) then
+                    compt_aff <= 1;
+                    CE_aff <= '1';
                 else
-                    CE2 <= '0';
-                    compt2 <= compt2 + 1;
+                    CE_aff <= '0';
+                    compt_aff <= compt_aff + 1;
+                end if;
+            end if;
+        end if;     
+    end process;
+    
+    CE_machine_etat : process(H)
+    begin
+        if (rising_edge(H)) then
+            if (raz = '1') then
+                compt_fsm <= 1;
+            else            
+                if (compt_fsm = timer_fsm) then
+                    compt_fsm <= 1;
+                    CE_fsm <= '1';
+                else
+                    CE_fsm <= '0';
+                    compt_fsm <= compt_fsm + 1;
                 end if;
             end if;
         end if;     
