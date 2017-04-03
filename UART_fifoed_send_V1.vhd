@@ -67,6 +67,7 @@ begin
                 if reset='1' then
                         cnt <= 0;
                 elsif nbbits>=12 or cnt=0 then
+                        cnt <= 107;--867; -- (100MHz /  115200bps) - 1
                 else
                         cnt <= cnt-1;
                 end if;
