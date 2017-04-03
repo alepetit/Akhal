@@ -38,6 +38,7 @@ entity vitesse_enc is
               raz          : in STD_LOGIC;
               CE           : in STD_LOGIC;
               nb_increment : in STD_LOGIC_VECTOR  (nb_bit_increment-1 downto 0);
+
               diff         : out STD_LOGIC_VECTOR (nb_bit_diff-1 downto 0);
               vitesse      : out STD_LOGIC_VECTOR (nb_bit_vitesse-1 downto 0));
 end vitesse_enc;
@@ -60,14 +61,15 @@ begin
             nb_prec <= 0;
             vit     <= 0;
             diff1   <= 0;
+
         elsif CE = '1' then
-            --if nb_incr >= nb_prec then
-                vit <= 1608000*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
+            if nb_incr >= nb_prec then
+                vit   <= 1608000*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_incr - nb_prec;
-            --else
-            --    vit <= 1608000*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
-            --    diff1 <= nb_prec - nb_incr;
-            --end if;
+            else
+                vit <= 1608000*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
+                diff1 <= nb_prec - nb_incr;
+            end if;
             nb_prec <= nb_incr;
         else
             diff1   <= diff1;

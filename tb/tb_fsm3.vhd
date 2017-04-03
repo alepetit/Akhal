@@ -5,12 +5,12 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity tb_fsm3 is
-end tb_fsm3;
+entity tb_fsm4 is
+end tb_fsm4;
 
-architecture tb of tb_fsm3 is
+architecture tb of tb_fsm4 is
 
-    component fsm3
+    component fsm4
         port (H            : in std_logic;
               raz          : in std_logic;
               encs         : in std_logic_vector (1 downto 0);
@@ -26,7 +26,7 @@ architecture tb of tb_fsm3 is
 
 begin
 
-    dut : fsm3
+    dut : fsm4
     port map (H            => H,
               raz          => raz,
               encs         => encs,

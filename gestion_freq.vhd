@@ -56,10 +56,10 @@ begin
             else
                 if (compt_enc = timer_enc) then
                     compt_enc <= 1;
-                    CE_enc <= '1';
+                    CE_enc    <= '1';
                 else
                     compt_enc <= compt_enc + 1;
-                    CE_enc <= '0';
+                    CE_enc    <= '0';
                 end if;
             end if;
         end if;     

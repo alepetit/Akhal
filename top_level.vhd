@@ -63,7 +63,11 @@ signal fencs                  : STD_LOGIC_VECTOR (1 downto 0);
 signal data_from_uart         : std_logic_vector(7 downto 0);
 signal i_uart                 : std_logic_vector(7 downto 0);
 signal data_to_uart           : std_logic_vector(7 downto 0);
+signal data_to_uart_D       : std_logic_vector(7 downto 0);
 signal dat_en_rx, dat_en_tx   : std_logic;
+
+signal data_en_to_uart        : std_logic;
+signal data_en_to_uart_D      : std_logic;
 
 begin
 
@@ -82,7 +86,6 @@ rebonds : entity work.anti_rebond  port map(encs       => encs,
                                         
 encod   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
-                                            CE           => CE_fsm,
                                             encs         => fencs,
                                             nb_increment => nb_increment
                                             );    
@@ -136,16 +139,39 @@ uart_rx : ENTITY work.UART_recv port map (clk => H,
                                           dat => data_from_uart,
                                           dat_en => dat_en_rx);
 
-uart_tx : ENTITY work.UART_send port map (clk => H,
+uart_tx : ENTITY work.UART_fifoed_send port map (clk_100Mhz => H,
                                           reset => raz,
-                                          dat_en => CE_enc,
+                                          dat_en => data_en_to_uart,
                                           dat => data_to_uart,
                                           TX => RsTx,
-                                          busy => open);
+                                          fifo_empty => open,
+                                          fifo_afull => open,
+                                          fifo_full => open);
                                           
 --data_to_uart <= vitesse(7 downto 0);
-data_to_uart <= diff(7 downto 0) when (switch1 = '1' and switch2 = '1') ELSE vitesse(8 downto 1);
-                                       
+--data_to_uart <= diff(7 downto 0) when (switch1 = '1' and switch2 = '1') ELSE vitesse(8 downto 1);
+data_to_uart      <= diff(7 downto 0);
+data_en_to_uart   <= CE_enc;
+
+--process(H, CE_enc)
+--begin
+--    if rising_edge(H) then
+--        if CE_enc='1' then
+--            data_to_uart_D    <= std_logic_vector(RESIZE (unsigned(diff(nb_bit_diff-1 downto 8)),8));
+--            data_to_uart      <= diff(7 downto 0);
+--            data_en_to_uart   <= '1';
+--            data_en_to_uart_D <= CE_enc;
+--        else
+--            data_to_uart_D    <= data_to_uart_D;
+--            data_to_uart      <= data_to_uart_D;
+--            data_en_to_uart   <= data_en_to_uart_D;
+--            data_en_to_uart_D <= CE_enc;
+--        end if;
+--    end if;
+--end process;
+
+
+
 
 process(H)
 begin

@@ -21,6 +21,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.mes_constantes.all;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -35,7 +37,7 @@ entity fsm3 is
     Port ( H : in STD_LOGIC;
            raz : in STD_LOGIC;
            encs : in STD_LOGIC_VECTOR (1 downto 0);
-           nb_increment : out STD_LOGIC_VECTOR (31 downto 0));
+           nb_increment : out STD_LOGIC_VECTOR (nb_bit_increment-1 downto 0));
 end fsm3;
 
 architecture Behavioral of fsm3 is
@@ -43,7 +45,7 @@ architecture Behavioral of fsm3 is
 SIGNAL valeur_rotation : STD_LOGIC_VECTOR (1 DOWNTO 0);
 type state is (e_raz, initial, detect_sens, horaire, anti_horaire, increment, decrement, attente_horaire, attente_anti_horaire);
 signal etat   : state;
-signal cpt : integer range 0 to 2147483647;
+signal cpt : integer range 0 to max_increment;
 signal fencs : STD_LOGIC_VECTOR (1 downto 0);
 begin
 
@@ -152,16 +154,16 @@ end process calcul_etat;
     begin
         if (H'event and H ='1') then
                 case etat is
-                        when e_raz =>   cpt <= 10000;--1073741824;
-                        when increment => cpt <= cpt + 1;
-                        when decrement => cpt <= cpt - 1;
+                        when e_raz =>   cpt <= init_increment;--1073741824;
+                        when increment => cpt <= cpt + 4;
+                        when decrement => cpt <= cpt - 4;
                         when others    => cpt <= cpt;
                 end case;
 
         end if;
     end process calcul_cpt;
    
-    nb_increment <= std_logic_vector(to_signed(cpt,32));
+    nb_increment <= std_logic_vector(to_unsigned(cpt,21));
 
 
 end Behavioral;
