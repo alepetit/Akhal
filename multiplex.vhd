@@ -40,6 +40,7 @@ entity multiplex is
            diff_inc : in STD_LOGIC_VECTOR(nb_bit_diff-1 downto 0);
            switch1  : in STD_LOGIC;
            switch2  : in STD_LOGIC;
+           nb_dead  : in STD_LOGIC_VECTOR(9 downto 0);
            sortie   : out STD_LOGIC_VECTOR(nb_bit_increment-1 downto 0)
            );
 end multiplex;
@@ -50,10 +51,12 @@ begin
 
 process(switch1, switch2, nb_inc, vitesse, diff_inc)
 begin
-    if switch1 = '0' then
+    if (switch1 = '0' and switch2 = '0') then
         sortie <= std_logic_vector ( RESIZE (unsigned(vitesse), nb_bit_increment));
-    elsif switch2 = '0' then
+    elsif (switch1 = '1' and switch2 = '0') then
         sortie <= std_logic_vector ( RESIZE (unsigned(nb_inc), nb_bit_increment));
+    elsif (switch1 = '0' and switch2 = '1') then
+        sortie <= std_logic_vector ( RESIZE (unsigned(nb_dead), nb_bit_increment));        
     else 
         sortie <= std_logic_vector ( RESIZE (unsigned(diff_inc), nb_bit_increment));
     end if;

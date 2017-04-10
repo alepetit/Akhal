@@ -37,7 +37,8 @@ entity fsm4 is
     Port ( H            : in STD_LOGIC;
            raz          : in STD_LOGIC;
            encs         : in STD_LOGIC_VECTOR (1 downto 0);
-           nb_increment : out STD_LOGIC_VECTOR (nb_bit_increment-1 downto 0)
+           nb_increment : out STD_LOGIC_VECTOR (nb_bit_increment-1 downto 0);
+           nb_dead      : out STD_LOGIC_VECTOR(9 downto 0)
            );
 end fsm4;
 
@@ -46,7 +47,7 @@ architecture Behavioral of fsm4 is
     type etat is (init, oo, oi, io, ii, oop, oom, oip, oim, iip, iim, iop, iom, dead);
 
     signal etat_present, etat_futur : etat;
-    signal cpt_incr : integer range 0 to max_increment;
+    signal cpt_incr, cpt_dead       : integer range 0 to max_increment;
 
 begin
 
@@ -118,8 +119,9 @@ begin
         begin
             if rising_edge(H) then
                 case etat_present is 
-                    when init   => cpt_incr <= 0;--init_increment;
-                    when dead   => cpt_incr <= cpt_incr + 1;--init_increment;
+                    when init   => cpt_incr <= init_increment;
+                                   cpt_dead <= 0;
+                    when dead   => cpt_dead <= cpt_dead + 1;--init_increment;
                     when oop    => cpt_incr <= cpt_incr + 1;
                     when oip    => cpt_incr <= cpt_incr + 1;
                     when iop    => cpt_incr <= cpt_incr + 1;
@@ -132,6 +134,8 @@ begin
                 end case;
             end if;
         end process;
+
+
 
 --    direction : process (H, raz, etat_present, etat_futur)
 --        begin
@@ -151,5 +155,6 @@ begin
 --        end process;
 
     nb_increment <= std_logic_vector(to_unsigned(cpt_incr, nb_bit_increment));
+    nb_dead      <= std_logic_vector(to_unsigned(cpt_dead, 10));
 
 end Behavioral;

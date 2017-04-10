@@ -40,11 +40,12 @@ entity top_level is
            encs            : in STD_LOGIC_VECTOR (1 downto 0);
            switch1         : in std_logic;
            switch2         : in std_logic;
+           switch3         : in std_logic;
            led1            : out std_logic;
            led2            : out std_logic;
            RsTx            : out STD_LOGIC;
            pwm             : out std_logic;
-           led             : out STD_LOGIC_VECTOR (8 downto 0);
+           led             : out STD_LOGIC_VECTOR (9 downto 0);
            an              : out STD_LOGIC_VECTOR (7 downto 0);
            sept_segments   : out STD_LOGIC_VECTOR (6 downto 0)
            );
@@ -68,6 +69,10 @@ signal dat_en_rx, dat_en_tx   : std_logic;
 
 signal data_en_to_uart        : std_logic;
 signal data_en_to_uart_D      : std_logic;
+signal bug                    : std_logic;
+
+signal nb_dead : STD_LOGIC_VECTOR(9 downto 0);
+signal bugS    : std_logic_vector(9 downto 0);
 
 begin
 
@@ -80,13 +85,17 @@ horloge : entity work.gestion_freq   port map (H  => H,
                                  
 rebonds : entity work.anti_rebond  port map(encs       => encs,          
                                             H          => H,           
-                                            raz        => raz,           
+                                            raz        => raz, 
+                                            switch     => switch3,  
+                                            bug        => bug,    
+                                            bugS       => bugS,
                                             valeur_rot => fencs
                                             );
                                         
 encod   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
                                             encs         => fencs,
+                                            nb_dead      => nb_dead,
                                             nb_increment => nb_increment
                                             );    
                                                                                                                   
@@ -102,6 +111,7 @@ mux : entity work.multiplex port map(vitesse  => vitesse,
                                      diff_inc => diff,
                                      switch1  => switch1,
                                      switch2  => switch2,
+                                     nb_dead => nb_dead,
                                      sortie   => nb_in
                                      );
                                      
@@ -125,10 +135,11 @@ begin
 end process;
 
 
-led <= '0' & i_uart;
+led <= bugS;--'0' & i_uart when bug = '0' else bugS;
 
 out_pwm : ENTITY work.gen_pwm port map (H        => H,
                                         raz      => raz,
+                                        CE       => CE_fsm,
                                         commande => i_uart,
                                         pwm      => pwm
                                         );

@@ -35,6 +35,9 @@ entity anti_rebond is
     Port ( encs            : in STD_LOGIC_VECTOR (1 downto 0);
            H               : in STD_LOGIC;
            raz             : in STD_lOGIC;
+           switch          : in std_logic;
+           bug             : out std_logic;
+           bugS            : out STD_LOGIC_VECTOR (9 downto 0);
            valeur_rot : out STD_LOGIC_VECTOR (1 downto 0));
 end anti_rebond;
 
@@ -42,7 +45,69 @@ architecture Behavioral of anti_rebond is
 
 signal valeur_rotation : STD_LOGIC_VECTOR(1 downto 0);
 
+    signal dbug : STD_LOGIC := '0';
+    signal last : STD_LOGIC_VECTOR(1 downto 0);
+    signal lastE : STD_LOGIC_VECTOR(1 downto 0);
+
+    signal EntreeENCS : STD_LOGIC := '0';
+    signal LastENCS   : STD_LOGIC_vector(1 downto 0);
+    signal BugENCS    : STD_LOGIC_VECTOR (8 downto 0);
+    
+    signal shiftENCS, shiftInterne  : STD_LOGIC_VECTOR(7 downto 0);
 begin
+
+    entree : PROCESS(H)
+	BEGIN
+		IF(H'event and H='1') THEN
+		  IF raz='1' THEN
+		      EntreeENCS <= '0';
+		      lastE <= encs;
+		      last <= "00";
+              dbug <= '0';
+              BugENCS <= (others => '0');
+
+
+              shiftENCS <= (others => '0');
+		  ELSIF (EntreeENCS = '0' and dbug = '0') THEN
+		      EntreeENCS <= (lastE(0) xor encs(0)) AND (lastE(1) xor encs(1));
+    		  lastE <= encs;
+    		  dbug <= (last(0) xor valeur_rotation(0)) AND (last(1) xor valeur_rotation(1));
+              last <= valeur_rotation;
+              BugENCS <= last & valeur_rotation & lastE & encs & dbug;
+              shiftENCS <= shiftENCS(5 downto 0) & valeur_rotation;
+              shiftInterne <= shiftInterne(5 downto 0) & valeur_rotation;
+		  ELSE
+		      EntreeENCS <= EntreeENCS;
+		      lastE <= lastE;
+		      last <= last;
+              dbug <= dbug;
+              BugENCS <= BugENCS;
+              shiftENCS <= shiftENCS;
+              shiftInterne <= shiftInterne;
+		  END IF;	
+		END IF;	
+	END PROCESS;
+
+--    PROCESS(H)
+--	BEGIN
+--		IF(H'event and H='1') THEN
+--		  IF raz='1' THEN
+--		      last <= "00";
+--		      dbug <= '0';
+--    		  lastE <= encs;
+--		  ELSIF dbug = '0' THEN
+--		      dbug <= (last(0) xor valeur_rotation(0)) AND (last(1) xor valeur_rotation(1));
+--              last <= valeur_rotation;
+--		  ELSE
+--    		  last <= last;
+--		      dbug <= dbug;
+--		  END IF;	
+--		END IF;	
+--	END PROCESS;
+	
+	
+    bug <= dbug or EntreeENCS;
+    bugS <= '1' & EntreeENCS & shiftENCS when switch = '1' else dbug & '1' & shiftInterne;
 
 filtre : PROCESS(H)
 	BEGIN

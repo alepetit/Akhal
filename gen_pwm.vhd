@@ -34,6 +34,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity gen_pwm is
     Port ( H        : in STD_LOGIC;
            raz      : in STD_LOGIC;
+           CE       : in STD_LOGIC;
            commande : in STD_LOGIC_VECTOR (7 downto 0);
            pwm      : out STD_LOGIC);
 end gen_pwm;
@@ -55,9 +56,11 @@ begin
         if raz = '1' then
             cpt <= 0;
         else
-            if cpt = 255 then
-                cpt <= 0;
-            else cpt <= cpt + 1;
+            if CE='1' then
+                if cpt = 255 then
+                    cpt <= 0;
+                else cpt <= cpt + 1;
+                end if;
             end if;
         end if;
     end if;

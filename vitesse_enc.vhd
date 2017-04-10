@@ -64,10 +64,10 @@ begin
 
         elsif CE = '1' then
             if nb_incr >= nb_prec then
-                vit   <= 1608000*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
+                vit   <= facteur_vitesse*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_incr - nb_prec;
             else
-                vit <= 1608000*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
+                vit <= facteur_vitesse*(nb_prec - nb_incr); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_prec - nb_incr;
             end if;
             nb_prec <= nb_incr;
