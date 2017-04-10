@@ -105,7 +105,11 @@ begin
                          
             when iip  => etat_futur <= io;
             when iim  => etat_futur <= oi;
-            when dead => etat_futur <= dead;
+            when dead => if    (encs="11") then etat_futur <= ii;
+                                     elsif (encs="01") then etat_futur <= io;
+                                     elsif (encs="10") then etat_futur <= oi;
+                                     else                   etat_futur <= oo;
+                                     end if;
         end case;
     end process;
     
@@ -114,7 +118,8 @@ begin
         begin
             if rising_edge(H) then
                 case etat_present is 
-                    when init   => cpt_incr <= init_increment;
+                    when init   => cpt_incr <= 0;--init_increment;
+                    when dead   => cpt_incr <= cpt_incr + 1;--init_increment;
                     when oop    => cpt_incr <= cpt_incr + 1;
                     when oip    => cpt_incr <= cpt_incr + 1;
                     when iop    => cpt_incr <= cpt_incr + 1;

@@ -1,6 +1,6 @@
 clear all;
 clc;
-s = serial('COM4');
+s = serial('COM8');
 s.Baudrate=921600;
 s.StopBits=1;
 s.Terminator='LF';
@@ -24,9 +24,11 @@ E = zeros(temps,1);
 hold off;
 h = waitbar(0,'Please wait...');
 
+%A = uart_speed(s, 255, temps);
+
 for i = 24:16:255
     waitbar(i/255)
-    A = uart_speed(s, 255, temps);
+    A = uart_speed(s, i, temps);
     plot(A); hold on;
 end
 close(h) 
