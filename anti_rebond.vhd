@@ -36,6 +36,7 @@ entity anti_rebond is
            H               : in STD_LOGIC;
            raz             : in STD_lOGIC;
            switch          : in std_logic;
+           CE              : in std_logic;
            bug             : out std_logic;
            bugS            : out STD_LOGIC_VECTOR (9 downto 0);
            valeur_rot : out STD_LOGIC_VECTOR (1 downto 0));
@@ -107,7 +108,7 @@ begin
 	
 	
     bug <= dbug or EntreeENCS;
-    bugS <= '1' & EntreeENCS & shiftENCS when switch = '1' else dbug & '1' & shiftInterne;
+    bugS <= dbug & EntreeENCS & shiftENCS when switch = '1' else dbug & EntreeENCS & shiftInterne;
 
 filtre : PROCESS(H)
 	BEGIN
@@ -115,26 +116,28 @@ filtre : PROCESS(H)
 			IF (raz='1') THEN
 				valeur_rotation <= "00"; -- mis à zero des deux sorties
 			ELSE
-				CASE encs IS 
-					
-				-- reset du LSB (ligne A et B à 0)
-				WHEN "00" => valeur_rotation(0)<='0'; 	                   -- RESET
-					         valeur_rotation(1) <= valeur_rotation(1);   --MEMORISATION
-					
-				-- set du LSB (ligne A et B à 1)
-				WHEN "11" => valeur_rotation(0)<='1';	 	     -- SET
-					           valeur_rotation(1)<=valeur_rotation(1); -- MEMORISATION							   
-				-- reset du MSB (ligne A à 1 et ligne B à 0)
-				WHEN "01" => valeur_rotation(0)<=valeur_rotation(0);   -- MEMORISATION
-					           valeur_rotation(1)<='0';		     -- RESET
-					
-				-- set du MSB (ligne A à 0 et ligne B à 1)
-				WHEN "10" => valeur_rotation(0)<=valeur_rotation(0);    -- MEMORISATION
-					           valeur_rotation(1)<='1';		     -- SET
-					
-				-- mémorisation 
-				WHEN OTHERS => valeur_rotation<=valeur_rotation;    -- MEMORISATION
-				END CASE;
+			    if CE = '1' then
+                    CASE encs IS 
+                        
+                    -- reset du LSB (ligne A et B à 0)
+                    WHEN "00" => valeur_rotation(0)<='0'; 	                   -- RESET
+                                 valeur_rotation(1) <= valeur_rotation(1);   --MEMORISATION
+                        
+                    -- set du LSB (ligne A et B à 1)
+                    WHEN "11" => valeur_rotation(0)<='1';	 	     -- SET
+                                   valeur_rotation(1)<=valeur_rotation(1); -- MEMORISATION							   
+                    -- reset du MSB (ligne A à 1 et ligne B à 0)
+                    WHEN "01" => valeur_rotation(0)<=valeur_rotation(0);   -- MEMORISATION
+                                   valeur_rotation(1)<='0';		     -- RESET
+                        
+                    -- set du MSB (ligne A à 0 et ligne B à 1)
+                    WHEN "10" => valeur_rotation(0)<=valeur_rotation(0);    -- MEMORISATION
+                                   valeur_rotation(1)<='1';		     -- SET
+                        
+                    -- mémorisation 
+                    WHEN OTHERS => valeur_rotation<=valeur_rotation;    -- MEMORISATION
+                    END CASE;
+                end if;
 			END IF;
 		END IF;	
 	END PROCESS filtre;

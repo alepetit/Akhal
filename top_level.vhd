@@ -54,7 +54,7 @@ end top_level;
 architecture Behavioral of top_level is
 
 -- SIGNAUX --
-signal CE_enc, CE_aff, CE_fsm : std_logic;
+signal CE_enc, CE_aff, CE_fsm, CE_filtre : std_logic;
 signal nb_increment           : std_logic_vector (nb_bit_increment-1 downto 0);
 signal vitesse                : std_logic_vector (nb_bit_vitesse-1 downto 0);
 signal diff                   : std_logic_vector (nb_bit_diff-1 downto 0);
@@ -80,11 +80,13 @@ horloge : entity work.gestion_freq   port map (H  => H,
                                               raz => raz,
                                               CE_enc => CE_enc,
                                               CE_aff => CE_aff,
-                                              CE_fsm => CE_fsm
+                                              CE_fsm => CE_fsm,
+                                              CE_filtre => CE_filtre
                                               );
                                  
 rebonds : entity work.anti_rebond  port map(encs       => encs,          
-                                            H          => H,           
+                                            H          => H,  
+                                            CE         => CE_filtre,         
                                             raz        => raz, 
                                             switch     => switch3,  
                                             bug        => bug,    
@@ -150,7 +152,7 @@ uart_rx : ENTITY work.UART_recv port map (clk => H,
                                           dat => data_from_uart,
                                           dat_en => dat_en_rx);
 
-uart_tx : ENTITY work.UART_fifoed_send port map (clk_100Mhz => H,
+uart_tx : ENTITY work.UART_fifoed_send port map (clk_100MHz => H,
                                           reset => raz,
                                           dat_en => data_en_to_uart,
                                           dat => data_to_uart,

@@ -23,6 +23,9 @@ package mes_constantes is
     constant hertz_aff : integer := 3000;
     constant timer_aff : integer := freq_fpga/hertz_aff;
 
+    constant hertz_filtre : integer := 7000;
+    constant timer_filtre : integer := freq_fpga/hertz_filtre;
+    
     constant hertz_fsm : integer := 100000;
     constant timer_fsm : integer := freq_fpga/hertz_fsm;
     

@@ -37,15 +37,17 @@ entity gestion_freq is
            raz           : in STD_LOGIC;
            CE_enc        : out STD_LOGIC;
            CE_aff        : out STD_LOGIC;
+           CE_filtre     : out std_logic;
            CE_fsm        : out STD_LOGIC);
 end gestion_freq;
 
 architecture Behavioral of gestion_freq is
 
 
-signal compt_enc : natural range 1 to timer_enc;
-signal compt_aff : natural range 1 to timer_aff;
-signal compt_fsm : natural range 1 to timer_fsm;
+signal compt_enc    : natural range 1 to timer_enc;
+signal compt_aff    : natural range 1 to timer_aff;
+signal compt_fsm    : natural range 1 to timer_fsm;
+signal compt_filtre : natural range 1 to timer_filtre;
 
 begin
     CE_encodeur : process(H)
@@ -98,5 +100,22 @@ begin
             end if;
         end if;     
     end process;
+    
+    CE_filtrage : process(H)
+        begin
+            if (rising_edge(H)) then
+                if (raz = '1') then
+                    compt_filtre <= 1;
+                else            
+                    if (compt_filtre = timer_filtre) then
+                        compt_filtre <= 1;
+                        CE_filtre <= '1';
+                    else
+                        CE_filtre <= '0';
+                        compt_filtre <= compt_filtre + 1;
+                    end if;
+                end if;
+            end if;     
+        end process;
     
 end Behavioral;
