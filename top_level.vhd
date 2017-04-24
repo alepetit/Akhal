@@ -163,7 +163,7 @@ uart_tx : ENTITY work.UART_fifoed_send port map (clk_100MHz => H,
                                           
 --data_to_uart <= vitesse(7 downto 0);
 --data_to_uart <= diff(7 downto 0) when (switch1 = '1' and switch2 = '1') ELSE vitesse(8 downto 1);
-data_to_uart      <= diff(7 downto 0);
+data_to_uart      <= vitesse(7 downto 0);
 data_en_to_uart   <= CE_enc;
 
 --process(H, CE_enc)
