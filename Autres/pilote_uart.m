@@ -11,19 +11,18 @@ s.TimeOut = 60;
 s.InputBufferSize = 512*2;
 fopen(s);
 
-temps = 100;
+temps = 500;
 A = zeros(temps/2,1);
 B = zeros(temps/2,1);
 C = zeros(temps,1);
 
 fichier = fopen('out.txt','w');
 
-%h = waitbar(0,'Please wait...');
-
-A = uart_speed(s, 255, temps/2);
-B = uart_speed(s, 255, temps/2);
+A = uart_speed(s, 10, temps/2);
+B = uart_speed(s, 10, temps/2);
 C = vertcat(A,B);
 
+%h = waitbar(0,'Please wait...');
 %for i = 24:16:255
 %    waitbar(i/255)
 %    A = uart_speed(s, i, temps);
