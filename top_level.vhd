@@ -64,17 +64,25 @@ signal fencs                  : STD_LOGIC_VECTOR (1 downto 0);
 signal data_from_uart         : std_logic_vector(7 downto 0);
 signal i_uart                 : std_logic_vector(7 downto 0);
 signal data_to_uart           : std_logic_vector(7 downto 0);
-signal data_to_uart_D       : std_logic_vector(7 downto 0);
+signal data_to_uart_D         : std_logic_vector(7 downto 0);
 signal dat_en_rx, dat_en_tx   : std_logic;
 
 signal data_en_to_uart        : std_logic;
 signal data_en_to_uart_D      : std_logic;
 signal bug                    : std_logic;
 
-signal nb_dead : STD_LOGIC_VECTOR(9 downto 0);
-signal bugS    : std_logic_vector(9 downto 0);
+signal nb_dead                : STD_LOGIC_VECTOR(9 downto 0);
+signal bugS                   : std_logic_vector(9 downto 0);
+
+signal commande_vit           : std_logic_vector(7 downto 0);
+signal vitesse8               : std_logic_vector(7 downto 0);
+signal correcteur10           : std_logic_vector(9 downto 0);
+
+
 
 begin
+
+-- PORT MAP --
 
 horloge : entity work.gestion_freq   port map (H  => H,
                                               raz => raz,
@@ -113,7 +121,7 @@ mux : entity work.multiplex port map(vitesse  => vitesse,
                                      diff_inc => diff,
                                      switch1  => switch1,
                                      switch2  => switch2,
-                                     nb_dead => nb_dead,
+                                     nb_dead => correcteur10,
                                      sortie   => nb_in
                                      );
                                      
@@ -123,26 +131,12 @@ aff : entity work.affichage   port map(H        => H,
                                        nb_in    => nb_in,
                                        sept_seg => sept_segments,
                                        an       => an
-                                       );                           
-
-process(H)
-begin
-    if rising_edge(H) then
-        if dat_en_rx = '1' then
-            i_uart <= data_from_uart;
-        else
-            i_uart <= i_uart;
-        end if;
-    end if;
-end process;
-
-
-led <= bugS;--'0' & i_uart when bug = '0' else bugS;
+                                       );
 
 out_pwm : ENTITY work.gen_pwm port map (H        => H,
                                         raz      => raz,
                                         CE       => CE_fsm,
-                                        commande => i_uart,
+                                        commande => commande_vit,
                                         pwm      => pwm
                                         );
 
@@ -161,29 +155,34 @@ uart_tx : ENTITY work.UART_fifoed_send port map (clk_100MHz => H,
                                           fifo_afull => open,
                                           fifo_full => open);
                                           
---data_to_uart <= vitesse(7 downto 0);
---data_to_uart <= diff(7 downto 0) when (switch1 = '1' and switch2 = '1') ELSE vitesse(8 downto 1);
+                                          
+correcteur : entity work.asserv_vitesse port map (H => H,
+                                                  raz => raz,
+                                                  consigne => i_uart,
+                                                  retour_enc => vitesse8,
+                                                  vitesse => commande_vit);
+
+-- PROCESS --
+
+
 data_to_uart      <= vitesse(7 downto 0);
+vitesse8          <= vitesse(7 downto 0);
 data_en_to_uart   <= CE_enc;
+correcteur10      <= "00" & commande_vit;
 
---process(H, CE_enc)
---begin
---    if rising_edge(H) then
---        if CE_enc='1' then
---            data_to_uart_D    <= std_logic_vector(RESIZE (unsigned(diff(nb_bit_diff-1 downto 8)),8));
---            data_to_uart      <= diff(7 downto 0);
---            data_en_to_uart   <= '1';
---            data_en_to_uart_D <= CE_enc;
---        else
---            data_to_uart_D    <= data_to_uart_D;
---            data_to_uart      <= data_to_uart_D;
---            data_en_to_uart   <= data_en_to_uart_D;
---            data_en_to_uart_D <= CE_enc;
---        end if;
---    end if;
---end process;
+process(H)
+begin
+    if rising_edge(H) then
+        if dat_en_rx = '1' then
+            i_uart <= data_from_uart;
+        else
+            i_uart <= i_uart;
+        end if;
+    end if;
+end process;
 
 
+led <= bugS;
 
 
 process(H)

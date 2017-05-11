@@ -12,30 +12,30 @@ s.InputBufferSize = 512*2;
 fopen(s);
 
 temps = 500;
-A = zeros(temps/2,1);
-B = zeros(temps/2,1);
-C = zeros(temps,1);
+%A = zeros(temps/2,1);
+%B = zeros(temps/2,1);
+%C = zeros(temps,1);
 
-fichier = fopen('out.txt','w');
+%fichier = fopen('out.txt','w');
 
-A = uart_speed(s, 10, temps/2);
-B = uart_speed(s, 10, temps/2);
-C = vertcat(A,B);
+A = uart_speed(s, 255, temps/2);
+B = uart_speed(s, 255, temps/2);
+%C = vertcat(A,B);
 
 %h = waitbar(0,'Please wait...');
-%for i = 24:16:255
+%for i = 0:16:255
 %    waitbar(i/255)
 %    A = uart_speed(s, i, temps);
 %    plot(A); hold on;
 %end
 %close(h) 
 
-plot(C);
-for i = 1:temps
-    fprintf(fichier,'%i\t %f\n',i , (C(i)));
-end
+%plot(C);
+%for i = 1:temps
+%    fprintf(fichier,'%i\t %f\n',i , (C(i)));
+%end
  
 fwrite(s, 0)
  
 fclose(s);
-fclose(fichier);
+%fclose(fichier);

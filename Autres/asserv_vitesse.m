@@ -25,9 +25,9 @@ while i<1000
     %commande(1) = 0.0194 * diff(2) - 0.03795 * diff(3) + 0.01855 * diff(4) + 2.949 * commande(2) - 2.898 * commande(3) + 0.949 * commande(4);
     commande(1) = 1.949 *commande(2) - 0.949*commande(3) +0.01938*diff(2) -0.01857*diff(3);
     if commande(1) > 255
-       commande(1) = 255;
+        commande(1) = 255;
     elseif commande(1) < 0
-    commande(1) = 0;
+        commande(1) = 0;
     end
     %commande(1)
     vit_reel = uart_speed(s, commande(1), 1)
