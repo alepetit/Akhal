@@ -40,6 +40,7 @@ entity vitesse_enc is
               nb_increment : in STD_LOGIC_VECTOR  (nb_bit_increment-1 downto 0);
 
               diff         : out STD_LOGIC_VECTOR (nb_bit_diff-1 downto 0);
+              vit_en       : out STD_LOGIC;
               vitesse      : out STD_LOGIC_VECTOR (nb_bit_vitesse-1 downto 0));
 end vitesse_enc;
 
@@ -61,8 +62,9 @@ begin
             nb_prec <= 0;
             vit     <= 0;
             diff1   <= 0;
-
+            vit_en  <= '0';
         elsif CE = '1' then
+            vit_en <= '1';
             if nb_incr >= nb_prec then
                 vit   <= facteur_vitesse*(nb_incr - nb_prec); -- 65536 = 2^16 + borner le calcul
                 diff1 <= nb_incr - nb_prec;
@@ -72,6 +74,7 @@ begin
             end if;
             nb_prec <= nb_incr;
         else
+            vit_en  <= '0';
             diff1   <= diff1;
             vit     <= vit;
             nb_prec <= nb_prec;            

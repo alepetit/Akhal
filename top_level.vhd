@@ -70,6 +70,7 @@ signal dat_en_rx, dat_en_tx   : std_logic;
 signal data_en_to_uart        : std_logic;
 signal data_en_to_uart_D      : std_logic;
 signal bug                    : std_logic;
+signal vit_en                 : std_logic;
 
 signal nb_dead                : STD_LOGIC_VECTOR(9 downto 0);
 signal bugS                   : std_logic_vector(9 downto 0);
@@ -114,6 +115,7 @@ vite    : entity work.vitesse_enc  port map (H            => H,
                                              CE           => CE_enc,
                                              nb_increment => nb_increment,
                                              diff         => diff,
+                                             vit_en       => vit_en,
                                              vitesse      => vitesse);
 
 mux : entity work.multiplex port map(vitesse  => vitesse,
@@ -157,6 +159,7 @@ uart_tx : ENTITY work.UART_fifoed_send port map (clk_100MHz => H,
                                           
                                           
 correcteur : entity work.asserv_vitesse port map (H => H,
+                                                  CE => vit_en,
                                                   raz => raz,
                                                   consigne => i_uart,
                                                   retour_enc => vitesse8,
