@@ -42,45 +42,58 @@ end asserv_vitesse;
 
 architecture Behavioral of asserv_vitesse is
 
-signal diff1, diff2, diff3              : integer;
-signal commande1, commande2, commande3  : integer;
-signal pre_com, commande_temp           : unsigned(31 downto 0);
+signal diff1, tdiff1, diff2, diff3      : signed(8 downto 0);
+signal commande1, commande2, commande3  : signed(8 downto 0);
+signal tcommande1                       : signed(21 downto 0);
+signal scommande2, scommande3           : signed(21 downto 0);
+signal tmp_scommande2, tmp_scommande3   : signed(21 downto 0);
+signal sdiff2, sdiff3                   : signed(21 downto 0);
 
+constant c2 : signed(12 downto 0) := to_signed(3992,13);
+constant c3 : signed(12 downto 0) := to_signed(1944,13);
+constant d2 : signed(12 downto 0) := to_signed(40,13);
+constant d3 : signed(12 downto 0) := to_signed(38,13);
 
 begin
 
+tmp_scommande2 <= signed( c2 * commande2 );
+tmp_scommande3 <= signed( c3 * commande3 );
+scommande2 <= tmp_scommande2;--( 31 downto 12 );
+scommande3 <= tmp_scommande3;--( 31 downto 12 );
+
+tdiff1 <= signed( RESIZE( unsigned(consigne), 9 ) ) - signed( RESIZE( unsigned(retour_enc), 9 ) );
+
+sdiff2     <= signed( d2 * diff2 );
+sdiff3     <= signed( d3 * diff3 );
+
+tcommande1  <= scommande2 - scommande3 + sdiff2 - sdiff3;
+commande1   <= tcommande1( 21 downto 13 );
+                
     process(H)
-    variable pre_com : unsigned(31 downto 0) := (others => '0');
     begin
         if rising_edge(H) then
             if raz = '1' then
-                diff1 <= to_integer(unsigned(consigne) - unsigned(retour_enc));
-                diff2 <= 0;
-                diff3 <= 0;
-                commande1 <= to_integer(unsigned(consigne));
-                commande2 <= 0;
-                commande3 <= 0;
+                diff1     <= tdiff1;
+                diff2     <= (others => '0');
+                diff3     <= (others => '0');
+                commande2 <= (others => '0');
+                commande3 <= (others => '0');
             elsif CE = '1' then
-                pre_com := to_unsigned(3992*commande2 + 1944*commande3 + 40*diff2 + 38*diff3, 32); --1.949*commande2 - 0.949*commande3 + 0.01938*diff2 - 0.01857*diff3;
-                commande1 <= to_integer(pre_com(31 downto 11));
                 commande3 <= commande2;
                 commande2 <= commande1;
-                diff3 <= diff2;
-                diff2 <= diff1;
-                diff1 <= to_integer(unsigned(consigne) - unsigned(retour_enc));
+                diff3     <= diff2;
+                diff2     <= diff1;
+                diff1     <= tdiff1;
             else
-                pre_com := pre_com;
-                commande1 <= commande1;
                 commande3 <= commande3;
                 commande2 <= commande2;
                 diff3 <= diff3;
                 diff2 <= diff2;
                 diff1 <= diff1;
             end if;
-        end if; 
+        end if;
     end process;
 
-commande_temp <= to_unsigned(commande1, 32);
-vitesse <= std_logic_vector(RESIZE(commande_temp,8));
+vitesse <= std_logic_vector(commande1(7 downto 0)) when commande1(8) = '0' else "00000000";
 
 end Behavioral;

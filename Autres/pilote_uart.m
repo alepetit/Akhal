@@ -25,7 +25,7 @@ temps = 100;
 h = waitbar(0,'Please wait...');
 for i = 0:16:255
     waitbar(i/255)
-    A = uart_speed(s, 255, temps);
+    A = uart_speed(s, i, temps);
     plot(A); hold on;
 end
 close(h) 
