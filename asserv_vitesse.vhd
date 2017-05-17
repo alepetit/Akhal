@@ -67,7 +67,7 @@ sdiff2     <= signed( d2 * diff2 );
 sdiff3     <= signed( d3 * diff3 );
 
 tcommande1  <= scommande2 - scommande3 + sdiff2 - sdiff3;
-commande1   <= tcommande1( 21 downto 13 );
+commande1   <= tcommande1( 19 downto 11 );
                 
     process(H)
     begin

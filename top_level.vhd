@@ -111,8 +111,8 @@ rebonds2 : entity work.anti_rebond  port map(encs       => encs2,
                                             CE         => CE_filtre,         
                                             raz        => raz, 
                                             switch     => switch3,  
-                                            bug        => bug,    
-                                            bugS       => bugS,
+                                            bug        => open,    
+                                            bugS       => open,
                                             valeur_rot => fencs2
                                             );                                            
 
@@ -126,7 +126,7 @@ encod   : entity work.fsm4         port map (H           => H,
 encod2   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
                                             encs         => fencs2,
-                                            nb_dead      => nb_dead,
+                                            nb_dead      => open,
                                             nb_increment => nb_increment2
                                             );                                           
 
@@ -144,7 +144,7 @@ vite2    : entity work.vitesse_enc  port map (H            => H,
                                              CE           => CE_enc,
                                              nb_increment => nb_increment2,
                                              diff         => diff2,
-                                             vit_en       => vit_en,
+                                             vit_en       => open,
                                              vitesse      => vitesse2);
 
 mux : entity work.multiplex port map(vitesse  => vitesse,
