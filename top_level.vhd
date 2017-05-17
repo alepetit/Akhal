@@ -38,6 +38,7 @@ entity top_level is
            raz             : in STD_LOGIC;
            RsRx            : in STD_LOGIC;
            encs            : in STD_LOGIC_VECTOR (1 downto 0);
+           encs2           : in STD_LOGIC_VECTOR (1 downto 0);
            switch1         : in std_logic;
            switch2         : in std_logic;
            switch3         : in std_logic;
@@ -45,6 +46,7 @@ entity top_level is
            led2            : out std_logic;
            RsTx            : out STD_LOGIC;
            pwm             : out std_logic;
+           pwm2            : out STD_LOGIC;
            led             : out STD_LOGIC_VECTOR (9 downto 0);
            an              : out STD_LOGIC_VECTOR (7 downto 0);
            sept_segments   : out STD_LOGIC_VECTOR (6 downto 0)
@@ -55,11 +57,11 @@ architecture Behavioral of top_level is
 
 -- SIGNAUX --
 signal CE_enc, CE_aff, CE_fsm, CE_filtre : std_logic;
-signal nb_increment           : std_logic_vector (nb_bit_increment-1 downto 0);
-signal vitesse                : std_logic_vector (nb_bit_vitesse-1 downto 0);
-signal diff                   : std_logic_vector (nb_bit_diff-1 downto 0);
+signal nb_increment, nb_increment2       : std_logic_vector (nb_bit_increment-1 downto 0);
+signal vitesse, vitesse2                : std_logic_vector (nb_bit_vitesse-1 downto 0);
+signal diff, diff2                   : std_logic_vector (nb_bit_diff-1 downto 0);
 signal nb_in                  : std_logic_vector (nb_bit_increment-1 downto 0);
-signal fencs                  : STD_LOGIC_VECTOR (1 downto 0);
+signal fencs, fencs2          : STD_LOGIC_VECTOR (1 downto 0);
 
 signal data_from_uart         : std_logic_vector(7 downto 0);
 signal i_uart                 : std_logic_vector(7 downto 0);
@@ -75,8 +77,8 @@ signal vit_en                 : std_logic;
 signal nb_dead                : STD_LOGIC_VECTOR(9 downto 0);
 signal bugS                   : std_logic_vector(9 downto 0);
 
-signal commande_vit           : std_logic_vector(7 downto 0);
-signal vitesse8               : std_logic_vector(7 downto 0);
+signal commande_vit, commande_vit2           : std_logic_vector(7 downto 0);
+signal vitesse8, vitesse28               : std_logic_vector(7 downto 0);
 signal correcteur8            : std_logic_vector(7 downto 0);
 signal correcteur10           : std_logic_vector(9 downto 0);
 
@@ -103,14 +105,31 @@ rebonds : entity work.anti_rebond  port map(encs       => encs,
                                             bugS       => bugS,
                                             valeur_rot => fencs
                                             );
-                                        
+                                            
+rebonds2 : entity work.anti_rebond  port map(encs       => encs2,          
+                                            H          => H,  
+                                            CE         => CE_filtre,         
+                                            raz        => raz, 
+                                            switch     => switch3,  
+                                            bug        => bug,    
+                                            bugS       => bugS,
+                                            valeur_rot => fencs2
+                                            );                                            
+
 encod   : entity work.fsm4         port map (H           => H,
                                             raz          => raz,
                                             encs         => fencs,
                                             nb_dead      => nb_dead,
                                             nb_increment => nb_increment
-                                            );    
-                                                                                                                  
+                                            );   
+                                         
+encod2   : entity work.fsm4         port map (H           => H,
+                                            raz          => raz,
+                                            encs         => fencs2,
+                                            nb_dead      => nb_dead,
+                                            nb_increment => nb_increment2
+                                            );                                           
+
 vite    : entity work.vitesse_enc  port map (H            => H,
                                              raz          => raz,
                                              CE           => CE_enc,
@@ -118,6 +137,15 @@ vite    : entity work.vitesse_enc  port map (H            => H,
                                              diff         => diff,
                                              vit_en       => vit_en,
                                              vitesse      => vitesse);
+
+                                                                                                                  
+vite2    : entity work.vitesse_enc  port map (H            => H,
+                                             raz          => raz,
+                                             CE           => CE_enc,
+                                             nb_increment => nb_increment2,
+                                             diff         => diff2,
+                                             vit_en       => vit_en,
+                                             vitesse      => vitesse2);
 
 mux : entity work.multiplex port map(vitesse  => vitesse,
                                      nb_inc   => nb_increment,
@@ -139,9 +167,16 @@ aff : entity work.affichage   port map(H        => H,
 out_pwm : ENTITY work.gen_pwm port map (H        => H,
                                         raz      => raz,
                                         CE       => CE_fsm,
-                                        commande => correcteur8,
+                                        commande => commande_vit,
                                         pwm      => pwm
                                         );
+                                        
+out_pwm2 : ENTITY work.gen_pwm port map (H        => H,
+                                        raz      => raz,
+                                        CE       => CE_fsm,
+                                        commande => commande_vit2,
+                                        pwm      => pwm2
+                                        );                                        
 
 uart_rx : ENTITY work.UART_recv port map (clk => H,
                                           reset => raz,
@@ -165,16 +200,22 @@ correcteur : entity work.asserv_vitesse port map (H => H,
                                                   consigne => i_uart,
                                                   retour_enc => vitesse8,
                                                   vitesse => commande_vit);
-
+                                                  
+correcteur2 : entity work.asserv_vitesse port map (H => H,
+                                                CE => vit_en,
+                                                raz => raz,
+                                                consigne => i_uart,
+                                                retour_enc => vitesse28,
+                                                vitesse => commande_vit2);
 -- PROCESS --
 
 
 data_to_uart      <= commande_vit;
 vitesse8          <= vitesse(7 downto 0);
+vitesse28          <= vitesse2(7 downto 0);
 
 data_en_to_uart   <= CE_enc;
 correcteur10      <= "00" & commande_vit;
-correcteur8      <= commande_vit;
 
 process(H)
 begin

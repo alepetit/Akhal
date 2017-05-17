@@ -294,14 +294,14 @@ set_property IOSTANDARD LVCMOS33 [get_ports pwm]
 
 ##Pmod Header JD
 ##Bank = 35, Pin name = IO_L21N_T2_DQS_35,					Sch name = JD1
-#set_property PACKAGE_PIN H4 [get_ports {JD[0]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JD[0]}]
-##Bank = 35, Pin name = IO_L17P_T2_35,						Sch name = JD2
-#set_property PACKAGE_PIN H1 [get_ports {JD[1]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JD[1]}]
-##Bank = 35, Pin name = IO_L17N_T2_35,						Sch name = JD3
-#set_property PACKAGE_PIN G1 [get_ports {JD[2]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JD[2]}]
+set_property PACKAGE_PIN H4 [get_ports encs2[0]]
+set_property IOSTANDARD LVCMOS33 [get_ports encs2[0]]
+#Bank = 35, Pin name = IO_L17P_T2_35,						Sch name = JD2
+set_property PACKAGE_PIN H1 [get_ports encs2[1]]
+set_property IOSTANDARD LVCMOS33 [get_ports encs2[1]]
+#Bank = 35, Pin name = IO_L17N_T2_35,						Sch name = JD3
+set_property PACKAGE_PIN G1 [get_ports pwm2]
+set_property IOSTANDARD LVCMOS33 [get_ports pwm2]
 ##Bank = 35, Pin name = IO_L20N_T3_35,						Sch name = JD4
 #set_property PACKAGE_PIN G3 [get_ports {JD[3]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JD[3]}]
