@@ -116,7 +116,7 @@ filtre : PROCESS(H)
 			IF (raz='1') THEN
 				valeur_rotation <= "00"; -- mis à zero des deux sorties
 			ELSE
-			    if CE = '1' then
+			    --if CE = '1' then
                     CASE encs IS 
                         
                     -- reset du LSB (ligne A et B à 0)
@@ -137,7 +137,7 @@ filtre : PROCESS(H)
                     -- mémorisation 
                     WHEN OTHERS => valeur_rotation<=valeur_rotation;    -- MEMORISATION
                     END CASE;
-                end if;
+                --end if;
 			END IF;
 		END IF;	
 	END PROCESS filtre;

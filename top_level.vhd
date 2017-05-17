@@ -77,6 +77,7 @@ signal bugS                   : std_logic_vector(9 downto 0);
 
 signal commande_vit           : std_logic_vector(7 downto 0);
 signal vitesse8               : std_logic_vector(7 downto 0);
+signal correcteur8            : std_logic_vector(7 downto 0);
 signal correcteur10           : std_logic_vector(9 downto 0);
 
 
@@ -138,7 +139,7 @@ aff : entity work.affichage   port map(H        => H,
 out_pwm : ENTITY work.gen_pwm port map (H        => H,
                                         raz      => raz,
                                         CE       => CE_fsm,
-                                        commande => commande_vit,
+                                        commande => correcteur8,
                                         pwm      => pwm
                                         );
 
@@ -168,10 +169,12 @@ correcteur : entity work.asserv_vitesse port map (H => H,
 -- PROCESS --
 
 
-data_to_uart      <= vitesse(7 downto 0);
+data_to_uart      <= commande_vit;
 vitesse8          <= vitesse(7 downto 0);
+
 data_en_to_uart   <= CE_enc;
 correcteur10      <= "00" & commande_vit;
+correcteur8      <= commande_vit;
 
 process(H)
 begin
